@@ -1,0 +1,3018 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>نظام إدارة سنتر العباقرة التعليمي — المرحلة الأولى</title>
+  <script async src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script async src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script async src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'Cairo', 'Inter', system-ui, -apple-system, sans-serif;
+      background-color: #0f172a;
+      color: #f8fafc;
+      margin: 0;
+      padding: 0;
+      overflow-x: hidden;
+      direction: rtl;
+    }
+    .hidden { display: none !important; }
+    .glass-card {
+      background: rgba(30, 41, 59, 0.94);
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 12px;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4);
+    }
+    .tap-btn {
+      min-height: 44px;
+      padding: 10px 16px;
+      border-radius: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+      transition: all 0.16s ease;
+      font-family: inherit;
+    }
+    .tap-btn:active {
+      transform: scale(0.97);
+    }
+    input, select, textarea {
+      font-family: inherit;
+      background: #0f172a;
+      color: #ffffff;
+      border: 1px solid #334155;
+      border-radius: 10px;
+      padding: 10px 12px;
+      width: 100%;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    th, td {
+      padding: 8px 10px;
+      text-align: right;
+      border-bottom: 1px solid rgba(51, 65, 85, 0.6);
+    }
+    @media print {
+      body {
+        background: #ffffff !important;
+        color: #000000 !important;
+      }
+      .no-print {
+        display: none !important;
+      }
+      #printArea {
+        display: block !important;
+        position: static !important;
+        width: 100% !important;
+        background: #ffffff !important;
+        color: #000000 !important;
+      }
+    }
+    .cards-grid-a4 {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col selection:bg-blue-600 selection:text-white">
+
+  <!-- شريط الإشعارات العائم (Toast) -->
+  <div id="toastContainer" class="fixed top-4 left-4 right-4 z-50 flex flex-col gap-2 pointer-events-none no-print"></div>
+
+  <!-- شاشة تسجيل الدخول -->
+  <section id="loginScreen" class="min-h-screen flex items-center justify-center p-4 no-print">
+    <div class="glass-card w-full max-w-md rounded-3xl p-6 shadow-2xl border border-blue-500/30">
+      <div class="flex flex-col items-center text-center mb-6">
+        <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-700 flex items-center justify-center text-3xl font-extrabold shadow-lg mb-3" style="background:#1d4ed8;width:64px;height:64px;border-radius:16px;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;">
+          ع
+        </div>
+        <h1 class="text-2xl font-extrabold text-white" style="margin:0;">سنتر العباقرة التعليمي</h1>
+        <p class="text-xs text-slate-300 mt-1">منظومة الإدارة الذكية للموبايل (Offline-First PWA)</p>
+      </div>
+
+      <div class="space-y-4">
+        <div style="margin-bottom:12px;">
+          <label for="loginUsername" class="block text-xs font-bold text-slate-300 mb-1">اسم المستخدم</label>
+          <input id="loginUsername" type="text" value="mrk" placeholder="مثال: mrk"
+            class="w-full rounded-xl bg-slate-900/90 border border-slate-700 px-4 py-3 text-white focus:outline-none focus:border-blue-500 text-base" />
+        </div>
+        <div style="margin-bottom:12px;">
+          <label for="loginPassword" class="block text-xs font-bold text-slate-300 mb-1">كلمة المرور</label>
+          <input id="loginPassword" type="password" value="1510" placeholder="••••"
+            class="w-full rounded-xl bg-slate-900/90 border border-slate-700 px-4 py-3 text-white focus:outline-none focus:border-blue-500 text-base" />
+        </div>
+
+        <div id="loginErrorBox" class="hidden rounded-xl bg-rose-950/80 border border-rose-500/50 p-3 text-xs text-rose-200 font-semibold"></div>
+
+        <button id="btnDoLogin" type="button" style="background:#2563eb;color:#fff;width:100%;"
+          class="tap-btn w-full rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold py-3.5 shadow-lg text-base">
+          تسجيل الدخول للنظام
+        </button>
+
+        <div class="pt-3 border-t border-slate-700/70 flex items-center justify-between text-xs text-slate-400" style="margin-top:12px;display:flex;justify-content:space-between;align-items:center;">
+          <span>حساب الأدمن الافتراضي: <strong class="text-blue-400">mrk / 1510</strong></span>
+          <button id="btnQuickFillAdmin" type="button" style="background:transparent;color:#60a5fa;border:none;cursor:pointer;" class="text-blue-400 hover:underline font-semibold">تعبئة تلقائية</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- واجهة التطبيق الرئيسية بعد الدخول -->
+  <div id="appShell" class="hidden flex-1 flex flex-col pb-24 no-print">
+    <!-- الهيدر العلوي -->
+    <header class="sticky top-0 z-30 bg-slate-900/95 backdrop-blur border-b border-slate-800 px-3 py-2.5" style="background:#0f172a;border-bottom:1px solid #1e293b;padding:10px 12px;">
+      <div class="max-w-5xl mx-auto flex items-center justify-between gap-2" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+        <div class="flex items-center gap-2.5" style="display:flex;align-items:center;gap:10px;">
+          <div class="w-10 h-10 rounded-xl bg-blue-700 flex items-center justify-center font-extrabold text-lg text-white shadow" style="background:#1d4ed8;width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:800;">ع</div>
+          <div>
+            <div class="flex items-center gap-2" style="display:flex;align-items:center;gap:8px;">
+              <h2 class="font-extrabold text-sm sm:text-base text-white" style="margin:0;">سنتر العباقرة</h2>
+              <span id="networkBadge" class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-emerald-900/70 text-emerald-300 border border-emerald-600/40" style="background:#064e3b;color:#6ee7b7;padding:2px 8px;border-radius:99px;font-size:11px;">جاهز أوفلاين</span>
+            </div>
+            <p class="text-[11px] text-slate-400" style="margin:2px 0 0;font-size:12px;">
+              المستخدم: <span id="activeUserLabel" class="text-blue-300 font-bold">mrk</span>
+              (<span id="activeRoleLabel" class="text-amber-300 font-bold">مالك النظام</span>)
+            </p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-1.5" style="display:flex;gap:6px;">
+          <button id="btnHeaderSync" type="button" style="background:#4f46e5;color:#fff;"
+            class="tap-btn px-3 py-1.5 rounded-xl bg-indigo-600/90 hover:bg-indigo-500 text-white text-xs font-bold flex items-center gap-1.5 shadow">
+            <span>مزامنة</span>
+            <span id="pendingSyncBadge" class="px-1.5 py-0.5 rounded-full bg-slate-950 text-amber-300 text-[10px]">0</span>
+          </button>
+          <button id="btnHeaderBackup" type="button" style="background:#047857;color:#fff;"
+            class="tap-btn px-2.5 py-1.5 rounded-xl bg-emerald-700/80 hover:bg-emerald-600 text-white text-xs font-bold">
+            نسخة احتياطية
+          </button>
+          <button id="btnHeaderLogout" type="button" style="background:#1e293b;color:#e2e8f0;"
+            class="tap-btn px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-rose-900/70 text-slate-200 text-xs font-bold">
+            خروج
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- شريط التنقل السريع (مناسب للموبايل والكمبيوتر) -->
+    <nav class="bg-slate-900/80 border-b border-slate-800 px-2 py-2 sticky top-[61px] z-20" style="background:#1e293b;padding:8px;">
+      <div class="max-w-5xl mx-auto flex flex-wrap gap-1.5 justify-center sm:justify-start" style="display:flex;flex-wrap:wrap;gap:6px;">
+        <button type="button" data-tab="tabFastPay" style="background:#2563eb;color:#fff;" class="nav-tab tap-btn px-3 py-2 rounded-xl text-xs font-extrabold bg-blue-600 text-white">
+          1. تحصيل سريع (QR)
+        </button>
+        <button type="button" data-tab="tabAttendance" style="background:#334155;color:#fff;" class="nav-tab tap-btn px-3 py-2 rounded-xl text-xs font-bold bg-slate-800 text-slate-200">
+          2. حضور وغياب (QR)
+        </button>
+        <button type="button" data-tab="tabStudents" style="background:#334155;color:#fff;" class="nav-tab tap-btn px-3 py-2 rounded-xl text-xs font-bold bg-slate-800 text-slate-200">
+          3. الطلاب وأكواد الدروس
+        </button>
+        <button type="button" data-tab="tabCardsPrint" style="background:#334155;color:#fff;" class="nav-tab tap-btn px-3 py-2 rounded-xl text-xs font-bold bg-slate-800 text-slate-200">
+          4. الكارنيهات والـ PDF
+        </button>
+        <button type="button" data-tab="tabBulkImport" style="background:#334155;color:#fff;" class="nav-tab tap-btn px-3 py-2 rounded-xl text-xs font-bold bg-slate-800 text-slate-200">
+          5. رفع جماعي للطلاب
+        </button>
+        <button type="button" data-tab="tabDashboard" style="background:#334155;color:#fff;" class="nav-tab tap-btn px-3 py-2 rounded-xl text-xs font-bold bg-slate-800 text-slate-200">
+          6. لوحة التحكم والخزينة
+        </button>
+        <button type="button" data-tab="tabAdminCloud" style="background:#334155;color:#fcd34d;" class="nav-tab tap-btn px-3 py-2 rounded-xl text-xs font-bold bg-slate-800 text-amber-300">
+          7. النسخ والتفريغ والربط السحابي
+        </button>
+      </div>
+    </nav>
+
+    <!-- المحتوى الرئيسي -->
+    <main class="max-w-5xl w-full mx-auto p-3 sm:p-4 space-y-4 flex-1" style="max-width:1024px;margin:0 auto;padding:12px;width:100%;">
+
+      <!-- =================================================================== -->
+      <!-- تبويب 1: التحصيل السريع باللقط (QR / كود الدرس - أقدم شهر غير مسدد) -->
+      <!-- =================================================================== -->
+      <section id="tabFastPay" class="tab-panel space-y-4">
+        <div class="glass-card rounded-2xl p-4 border border-blue-500/30">
+          <div class="flex flex-wrap items-center justify-between gap-2 mb-3" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:12px;">
+            <div>
+              <h3 class="text-base sm:text-lg font-extrabold text-white" style="margin:0;">شاشة التحصيل السريع بلقط كود الدرس (QR)</h3>
+              <p class="text-xs text-slate-300" style="margin:4px 0 0;">القط كود الدرس من الكارنيه ليختار النظام تلقائياً <strong class="text-amber-300">أقدم شهر حضر فيه الطالب ولم يسدده</strong> (أو الشهر الحالي).</p>
+            </div>
+            <button id="btnTogglePayCamera" type="button" style="background:#2563eb;color:#fff;"
+              class="tap-btn px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow">
+              تشغيل كاميرا QR للدفع
+            </button>
+          </div>
+
+          <!-- حاوية كاميرا الدفع -->
+          <div id="payCameraWrapper" class="hidden mb-4 rounded-2xl overflow-hidden border-2 border-blue-500 bg-black p-2">
+            <div id="payQrReader" class="w-full max-w-sm mx-auto"></div>
+            <div class="text-center mt-2">
+              <button id="btnClosePayCamera" type="button" style="background:#e11d48;color:#fff;" class="tap-btn px-4 py-1.5 rounded-lg bg-rose-600 text-white text-xs font-bold">إيقاف الكاميرا</button>
+            </div>
+          </div>
+
+          <!-- إدخال أو لقط كود الدرس -->
+          <div class="flex flex-col sm:flex-row gap-2" style="display:flex;gap:8px;flex-wrap:wrap;">
+            <input id="fastPayLessonInput" type="text" placeholder="القط QR أو اكتب كود الدرس هنا (مثال: L1001)..." style="flex:1;min-width:200px;"
+              class="flex-1 rounded-xl bg-slate-900 border border-slate-700 px-4 py-3 text-white font-bold text-base focus:outline-none focus:border-blue-500" />
+            <button id="btnLookupLessonPay" type="button" style="background:#4f46e5;color:#fff;"
+              class="tap-btn px-6 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-extrabold text-sm">
+              فحص الاستحقاق فوراً
+            </button>
+          </div>
+
+          <!-- أزرار اللقط التجريبي السريع للمعاينة من الموبايل -->
+          <div class="mt-3 pt-3 border-t border-slate-800" style="margin-top:12px;padding-top:10px;border-top:1px solid #1e293b;">
+            <span class="block text-[11px] text-slate-400 mb-1.5" style="display:block;font-size:12px;color:#94a3b8;margin-bottom:6px;">أكواد دروس مسجلة (اضغط على أي كود لمحاكاة لقط الكاميرا فوراً):</span>
+            <div id="quickLessonChipsPay" class="flex flex-wrap gap-1.5" style="display:flex;flex-wrap:wrap;gap:6px;"></div>
+          </div>
+        </div>
+
+        <!-- بطاقة تأكيد الدفع اللحظية بعد اللقط -->
+        <div id="fastPayConfirmCard" class="hidden glass-card rounded-2xl p-4 border-2 border-emerald-500/60 shadow-xl space-y-4">
+          <div class="flex items-start justify-between gap-2 border-b border-slate-700/80 pb-3" style="display:flex;justify-content:space-between;align-items:flex-start;border-bottom:1px solid #334155;padding-bottom:10px;margin-bottom:10px;">
+            <div>
+              <span id="payCardBadge" class="inline-block px-2.5 py-0.5 rounded-full text-xs font-extrabold bg-amber-500/20 text-amber-300 border border-amber-500/40 mb-1">
+                أقدم شهر غير مسدد
+              </span>
+              <h4 id="payCardStudentName" class="text-xl font-extrabold text-white" style="margin:4px 0;">—</h4>
+              <p id="payCardLessonInfo" class="text-xs text-slate-300 mt-0.5" style="margin:0;">—</p>
+            </div>
+            <div class="text-left">
+              <div class="text-xs text-slate-400">كود الدرس</div>
+              <div id="payCardLessonCode" class="text-lg font-extrabold text-blue-400 font-mono">L1001</div>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;">
+            <div class="bg-slate-900/90 rounded-xl p-3 border border-slate-800">
+              <label for="payCardTargetMonth" class="block text-[11px] text-slate-400 mb-1">الشهر المستحق (تلقائي وقابل للتغيير)</label>
+              <input id="payCardTargetMonth" type="month"
+                class="w-full bg-slate-800 text-amber-300 font-extrabold text-sm rounded-lg px-2.5 py-2 border border-slate-700" />
+              <p id="payCardMonthReason" class="text-[11px] text-amber-400 mt-1 font-semibold"></p>
+            </div>
+
+            <div class="bg-slate-900/90 rounded-xl p-3 border border-slate-800">
+              <label for="payCardAmount" class="block text-[11px] text-slate-400 mb-1">المبلغ المطلوب تحصيله (ج.م)</label>
+              <input id="payCardAmount" type="number" min="1" step="5"
+                class="w-full bg-slate-800 text-emerald-400 font-extrabold text-lg rounded-lg px-3 py-1.5 border border-slate-700" />
+              <p id="payCardHistoryNote" class="text-[11px] text-slate-400 mt-1"></p>
+            </div>
+
+            <div class="bg-slate-900/90 rounded-xl p-3 border border-slate-800">
+              <label for="payCardNotes" class="block text-[11px] text-slate-400 mb-1">ملاحظات الإيصال (اختياري)</label>
+              <input id="payCardNotes" type="text" placeholder="سداد نقدي..."
+                class="w-full bg-slate-800 text-white text-xs rounded-lg px-3 py-2 border border-slate-700" />
+              <p class="text-[11px] text-slate-400 mt-1">يُسجل في المدفوعات والخزينة فوراً</p>
+            </div>
+          </div>
+
+          <div class="flex flex-wrap gap-2 pt-1" style="display:flex;gap:8px;margin-top:10px;">
+            <button id="btnConfirmFastPayment" type="button" style="background:#059669;color:#fff;flex:1;"
+              class="tap-btn flex-1 min-w-[200px] rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold py-3.5 text-base shadow-lg">
+              تأكيد الدفع وتسجيل الإيصال
+            </button>
+            <button id="btnCancelFastPayment" type="button" style="background:#334155;color:#fff;"
+              class="tap-btn px-4 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs">
+              إلغاء
+            </button>
+          </div>
+        </div>
+
+        <!-- بطاقة ما بعد الدفع: رسالة الواتساب + إيصال PDF عند الطلب -->
+        <div id="postPaymentCard" class="hidden glass-card rounded-2xl p-4 border-2 border-blue-500/60 space-y-3">
+          <div class="flex items-center justify-between" style="display:flex;justify-content:space-between;align-items:center;">
+            <div>
+              <span class="text-xs font-extrabold text-emerald-400">تم تسجيل الدفعة بنجاح في الخزينة</span>
+              <h4 id="postPaySummaryTitle" class="text-base font-extrabold text-white mt-0.5">—</h4>
+            </div>
+            <span id="postPayReceiptNo" class="px-3 py-1 rounded-lg bg-slate-900 font-mono text-xs font-bold text-blue-300">REC-1001</span>
+          </div>
+
+          <div class="flex flex-wrap gap-2" style="display:flex;gap:8px;flex-wrap:wrap;">
+            <button id="btnSendPayWhatsApp" type="button" style="background:#16a34a;color:#fff;flex:1;"
+              class="tap-btn flex-1 min-w-[180px] rounded-xl bg-green-600 hover:bg-green-500 text-white font-extrabold py-3 px-4 text-xs shadow">
+              إرسال تأكيد الدفع واتساب لولي الأمر
+            </button>
+            <button id="btnPrintReceiptPdf" type="button" style="background:#1e293b;color:#fcd34d;"
+              class="tap-btn px-4 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-300 font-bold text-xs border border-amber-500/30">
+              إيصال PDF (عند الطلب)
+            </button>
+            <button id="btnNextStudentScan" type="button" style="background:#2563eb;color:#fff;"
+              class="tap-btn px-4 py-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs">
+              لقط الطالب التالي
+            </button>
+          </div>
+        </div>
+
+        <!-- آخر عمليات التحصيل اليومية -->
+        <div class="glass-card rounded-2xl p-4">
+          <h4 class="text-sm font-extrabold text-white mb-2">آخر إيصالات الدفع المسجلة</h4>
+          <div class="overflow-x-auto">
+            <table class="w-full text-right text-xs">
+              <thead class="bg-slate-900/90 text-slate-300">
+                <tr>
+                  <th class="p-2">الإيصال</th>
+                  <th class="p-2">كود الدرس</th>
+                  <th class="p-2">الطالب</th>
+                  <th class="p-2">المادة / المدرس</th>
+                  <th class="p-2">الشهر المسدد</th>
+                  <th class="p-2">المبلغ</th>
+                  <th class="p-2">إجراءات</th>
+                </tr>
+              </thead>
+              <tbody id="recentPaymentsTableBody" class="divide-y divide-slate-800"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- =================================================================== -->
+      <!-- تبويب 2: الحضور والغياب بالباركود (النظام القديم المعتمد بمرحلتين) -->
+      <!-- =================================================================== -->
+      <section id="tabAttendance" class="tab-panel hidden space-y-4">
+        <div class="glass-card rounded-2xl p-4 border border-indigo-500/30 space-y-4">
+          <div>
+            <h3 class="text-base sm:text-lg font-extrabold text-white">تسجيل الحضور والغياب بمرحلتين (نفس النظام المعتمد)</h3>
+            <p class="text-xs text-slate-300">المرحلة (1): اختر أو امسح كود المجموعة لتسجيل كل طلابها <strong class="text-emerald-400">حاضرين</strong> وتوليد استحقاق الشهر تلقائياً. المرحلة (2): امسح كود الدرس للطلاب <strong class="text-rose-400">الغائبين فقط</strong>.</p>
+          </div>
+
+          <!-- المرحلة 1: اختيار المجموعة وبدء الحصة -->
+          <div class="bg-slate-900/80 rounded-xl p-3 border border-slate-800 space-y-3">
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin-bottom:10px;">
+              <div>
+                <label for="attGroupSelect" class="block text-[11px] text-slate-400 mb-1">1. اختر أو امسح المجموعة</label>
+                <select id="attGroupSelect" class="w-full rounded-xl bg-slate-800 border border-slate-700 px-3 py-2.5 text-xs text-white font-bold"></select>
+              </div>
+              <div>
+                <label for="attDateInput" class="block text-[11px] text-slate-400 mb-1">تاريخ الحصة</label>
+                <input id="attDateInput" type="date" class="w-full rounded-xl bg-slate-800 border border-slate-700 px-3 py-2 text-xs text-white font-bold" />
+              </div>
+              <div>
+                <label for="attTitleInput" class="block text-[11px] text-slate-400 mb-1">عنوان / رقم الحصة</label>
+                <input id="attTitleInput" type="text" value="حصة دراسية منتظمة" class="w-full rounded-xl bg-slate-800 border border-slate-700 px-3 py-2 text-xs text-white" />
+              </div>
+            </div>
+
+            <button id="btnStartGroupAttendance" type="button" style="background:#059669;color:#fff;width:100%;"
+              class="tap-btn w-full rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold py-3 text-xs sm:text-sm shadow">
+              المرحلة 1: بدء الحصة وتسجيل كل طلاب المجموعة (حاضر)
+            </button>
+          </div>
+
+          <!-- المرحلة 2: مسح أكواد الغائبين فقط -->
+          <div id="attStep2Box" class="bg-slate-900/80 rounded-xl p-3 border border-rose-500/30 space-y-3">
+            <div class="flex flex-wrap items-center justify-between gap-2" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+              <div>
+                <span class="text-xs font-extrabold text-rose-300">المرحلة 2: مسح كود الدرس للغائبين فقط</span>
+                <p id="activeLectureLabel" class="text-[11px] text-slate-400">اختر المجموعة واضغط بدء الحصة أولاً</p>
+              </div>
+              <button id="btnToggleAttCamera" type="button" style="background:#e11d48;color:#fff;"
+                class="tap-btn px-3 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold">
+                كاميرا QR للغائبين
+              </button>
+            </div>
+
+            <div id="attCameraWrapper" class="hidden rounded-xl overflow-hidden border border-rose-500 bg-black p-2">
+              <div id="attQrReader" class="w-full max-w-sm mx-auto"></div>
+              <div class="text-center mt-2">
+                <button id="btnCloseAttCamera" type="button" style="background:#334155;color:#fff;" class="tap-btn px-3 py-1 rounded bg-slate-700 text-white text-xs">إغلاق الكاميرا</button>
+              </div>
+            </div>
+
+            <div class="flex gap-2" style="display:flex;gap:8px;margin-bottom:10px;">
+              <input id="attAbsentLessonInput" type="text" placeholder="امسح أو اكتب كود الدرس للطالب الغائب (مثال: L1002)..." style="flex:1;"
+                class="flex-1 rounded-xl bg-slate-800 border border-slate-700 px-3 py-2.5 text-xs text-white font-bold" />
+              <button id="btnMarkAbsentCode" type="button" style="background:#e11d48;color:#fff;"
+                class="tap-btn px-4 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-extrabold">
+                تحويل إلى غائب
+              </button>
+            </div>
+
+            <!-- جدول طلاب الحصة الحالية -->
+            <div class="overflow-x-auto">
+              <table class="w-full text-right text-xs">
+                <thead class="bg-slate-950 text-slate-300">
+                  <tr>
+                    <th class="p-2">كود الدرس</th>
+                    <th class="p-2">اسم الطالب</th>
+                    <th class="p-2">الحالة</th>
+                    <th class="p-2">تبديل سريع / واتساب غياب</th>
+                  </tr>
+                </thead>
+                <tbody id="lectureAttendanceTableBody" class="divide-y divide-slate-800"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- =================================================================== -->
+      <!-- تبويب 3: إدارة الطلاب والاشتراكات وتوليد كود الدرس التلقائي -->
+      <!-- =================================================================== -->
+      <section id="tabStudents" class="tab-panel hidden space-y-4">
+        <div class="glass-card rounded-2xl p-4 space-y-4">
+          <div class="border-b border-slate-800 pb-3">
+            <h3 class="text-base sm:text-lg font-extrabold text-white">تسجيل طالب واشتراك درس (توليد كود درس منفصل لكل مادة/مدرس)</h3>
+            <p class="text-xs text-slate-300">النظام يحفظ للطالب <strong class="text-blue-300">كود طالب موحد داخلياً</strong>، ويولّد تلقائياً <strong class="text-emerald-300">كود درس بسيط (مثل L1001)</strong> مرتبط بـ (الطالب + المادة + المدرس). إذا اشترك الطالب في مجموعة ثانية لنفس المادة ونفس المدرس يأخذ نفس كود الدرس تلقائياً.</p>
+          </div>
+
+          <!-- خيار: طالب جديد أم طالب مسجل مسبقاً -->
+          <div class="flex gap-2" style="display:flex;gap:8px;margin:10px 0;">
+            <button id="btnModeNewStudent" type="button" style="background:#2563eb;color:#fff;flex:1;" class="tap-btn flex-1 py-2 rounded-xl bg-blue-600 text-white text-xs font-extrabold">
+              تسجيل طالب جديد + اشتراك درس
+            </button>
+            <button id="btnModeExistingStudent" type="button" style="background:#1e293b;color:#cbd5e1;flex:1;" class="tap-btn flex-1 py-2 rounded-xl bg-slate-800 text-slate-300 text-xs font-bold">
+              إضافة درس لطالب مسجل مسبقاً
+            </button>
+          </div>
+
+          <!-- بحث ذكي عن طالب حالي -->
+          <div id="existingStudentPickerBox" class="hidden bg-slate-900/90 p-3 rounded-xl border border-slate-700 space-y-2">
+            <label for="smartSearchExistingStudent" class="block text-xs font-bold text-amber-300">ابحث عن الطالب بالاسم أو الكود أو الهاتف:</label>
+            <input id="smartSearchExistingStudent" type="text" placeholder="اكتب جزءاً من اسم الطالب..."
+              class="w-full rounded-xl bg-slate-800 border border-slate-700 px-3 py-2 text-xs text-white" />
+            <select id="existingStudentSelect" class="w-full rounded-xl bg-slate-800 border border-slate-700 px-3 py-2 text-xs text-white font-bold"></select>
+          </div>
+
+          <!-- بيانات الطالب الجديد -->
+          <div id="newStudentFieldsBox" class="grid grid-cols-1 sm:grid-cols-2 gap-3" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;">
+            <div>
+              <label for="stuNameInput" class="block text-xs font-bold text-slate-300 mb-1">اسم الطالب رباعياً</label>
+              <input id="stuNameInput" type="text" placeholder="مثال: أحمد محمد علي حسن"
+                class="w-full rounded-xl bg-slate-900 border border-slate-700 px-3 py-2.5 text-xs text-white" />
+            </div>
+            <div>
+              <label for="stuPhoneInput" class="block text-xs font-bold text-slate-300 mb-1">هاتف الطالب</label>
+              <input id="stuPhoneInput" type="tel" placeholder="010xxxxxxxx"
+                class="w-full rounded-xl bg-slate-900 border border-slate-700 px-3 py-2.5 text-xs text-white" />
+            </div>
+            <div>
+              <label for="stuGuardianNameInput" class="block text-xs font-bold text-slate-300 mb-1">اسم ولي الأمر</label>
+              <input id="stuGuardianNameInput" type="text" placeholder="محمد علي حسن"
+                class="w-full rounded-xl bg-slate-900 border border-slate-700 px-3 py-2.5 text-xs text-white" />
+            </div>
+            <div>
+              <label for="stuGuardianPhoneInput" class="block text-xs font-bold text-slate-300 mb-1">رقم واتساب ولي الأمر (لإشعارات الدفع والغياب)</label>
+              <input id="stuGuardianPhoneInput" type="tel" placeholder="010xxxxxxxx"
+                class="w-full rounded-xl bg-slate-900 border border-slate-700 px-3 py-2.5 text-xs text-white" />
+            </div>
+          </div>
+
+          <!-- القوائم المتتالية الذكية: الصف -> المادة -> المدرس -> المجموعة -->
+          <div class="bg-slate-900/80 p-3 rounded-xl border border-slate-800 space-y-3" style="margin-top:10px;">
+            <h4 class="text-xs font-extrabold text-blue-300">اختيار الدرس والمجموعة (قوائم متتالية ذكية)</h4>
+            <div class="grid grid-cols-1 sm:grid-cols-4 gap-2.5" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:8px;">
+              <div>
+                <label for="enrollGradeSelect" class="block text-[11px] text-slate-400 mb-1">1. الصف الدراسي</label>
+                <select id="enrollGradeSelect" class="w-full rounded-xl bg-slate-800 border border-slate-700 px-2.5 py-2 text-xs text-white font-bold"></select>
+              </div>
+              <div>
+                <label for="enrollSubjectSelect" class="block text-[11px] text-slate-400 mb-1">2. المادة الدراسية</label>
+                <select id="enrollSubjectSelect" class="w-full rounded-xl bg-slate-800 border border-slate-700 px-2.5 py-2 text-xs text-white font-bold"></select>
+              </div>
+              <div>
+                <label for="enrollTeacherSelect" class="block text-[11px] text-slate-400 mb-1">3. المدرس</label>
+                <select id="enrollTeacherSelect" class="w-full rounded-xl bg-slate-800 border border-slate-700 px-2.5 py-2 text-xs text-white font-bold"></select>
+              </div>
+              <div>
+                <label for="enrollGroupSelect" class="block text-[11px] text-slate-400 mb-1">4. المجموعة المتاحة</label>
+                <select id="enrollGroupSelect" class="w-full rounded-xl bg-slate-800 border border-slate-700 px-2.5 py-2 text-xs text-white font-bold"></select>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px;margin-top:8px;">
+              <div>
+                <label for="enrollFeeInput" class="block text-[11px] text-slate-400 mb-1">الاشتراك الشهري للدرس (قابل للتخصيص)</label>
+                <input id="enrollFeeInput" type="number" min="0" step="5"
+                  class="w-full rounded-xl bg-slate-800 border border-slate-700 px-3 py-2 text-xs text-emerald-300 font-extrabold" />
+              </div>
+              <div class="flex items-end">
+                <button id="btnSaveStudentEnrollment" type="button" style="background:#2563eb;color:#fff;width:100%;"
+                  class="tap-btn w-full rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-extrabold py-2.5 text-xs sm:text-sm shadow">
+                  حفظ الاشتراك وتوليد كود الدرس والكارنيه
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- جدول وبحث ذكي في كل اشتراكات الدروس والطلاب -->
+        <div class="glass-card rounded-2xl p-4 space-y-3">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <h4 class="text-sm font-extrabold text-white">سجل اشتراكات الدروس وأكواد الكارنيهات</h4>
+            <input id="searchEnrollmentsInput" type="text" placeholder="بحث ذكي بكود الدرس (L1001) أو اسم الطالب أو المادة..."
+              class="w-full sm:w-72 rounded-xl bg-slate-900 border border-slate-700 px-3 py-2 text-xs text-white" />
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-right text-xs">
+              <thead class="bg-slate-900 text-slate-300">
+                <tr>
+                  <th class="p-2">كود الدرس</th>
+                  <th class="p-2">كود الطالب</th>
+                  <th class="p-2">اسم الطالب</th>
+                  <th class="p-2">المادة والمدرس</th>
+                  <th class="p-2">المجموعة</th>
+                  <th class="p-2">الاشتراك</th>
+                  <th class="p-2">الكارنيه / الدفع</th>
+                </tr>
+              </thead>
+              <tbody id="enrollmentsTableBody" class="divide-y divide-slate-800"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- =================================================================== -->
+      <!-- تبويب 4: الكارنيهات (لكل درس كارنيه بـ QR) والطباعة PDF عند الطلب -->
+      <!-- =================================================================== -->
+      <section id="tabCardsPrint" class="tab-panel hidden space-y-4">
+        <div class="glass-card rounded-2xl p-4 space-y-4">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <h3 class="text-base sm:text-lg font-extrabold text-white">طباعة وتصدير كارنيهات الدروس (QR Code) عند الطلب</h3>
+              <p class="text-xs text-slate-300">كل درس له كارنيه مستقل يحمل كود الدرس والـ QR الخاص به (فردي أو جماعي 8 كارنيهات في ورقة A4).</p>
+            </div>
+            <div class="flex flex-wrap gap-2" style="display:flex;gap:8px;margin-top:8px;">
+              <select id="cardsFilterGroupSelect" class="rounded-xl bg-slate-900 border border-slate-700 px-3 py-2 text-xs text-white font-bold"></select>
+              <button id="btnPrintAllFilteredCards" type="button" style="background:#d97706;color:#fff;"
+                class="tap-btn px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-500 text-white text-xs font-extrabold shadow">
+                توليد PDF / طباعة الكارنيهات المعروضة (A4)
+              </button>
+            </div>
+          </div>
+
+          <div id="cardsPreviewGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-3" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px;margin-top:12px;"></div>
+        </div>
+      </section>
+
+      <!-- =================================================================== -->
+      <!-- تبويب 5: الرفع الجماعي للطلاب والاشتراكات مرة واحدة -->
+      <!-- =================================================================== -->
+      <section id="tabBulkImport" class="tab-panel hidden space-y-4">
+        <div class="glass-card rounded-2xl p-4 space-y-4">
+          <div>
+            <h3 class="text-base sm:text-lg font-extrabold text-white">الرفع الجماعي لبيانات الطلاب والاشتراكات دفعة واحدة</h3>
+            <p class="text-xs text-slate-300">يمكنك تحميل القالب الجاهز وتعبئته أو لصق بيانات الطلاب مباشرة، وسيقوم النظام بتوليد كود الطالب وكود الدرس تلقائياً لكل طالب (مع الحفاظ على نفس كود الدرس لو تكررت المادة والمدرس لنفس الطالب).</p>
+          </div>
+
+          <div class="flex flex-wrap gap-2" style="display:flex;gap:8px;flex-wrap:wrap;margin:10px 0;">
+            <button id="btnDownloadCsvTemplate" type="button" style="background:#047857;color:#fff;"
+              class="tap-btn px-4 py-2.5 rounded-xl bg-emerald-700 hover:bg-emerald-600 text-white text-xs font-extrabold">
+              تحميل قالب Excel/CSV جاهز للتعبئة
+            </button>
+            <label style="background:#2563eb;color:#fff;" class="tap-btn px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-extrabold cursor-pointer inline-flex items-center">
+              <span>اختيار ملف CSV من الموبايل</span>
+              <input id="bulkCsvFileInput" type="file" accept=".csv,.txt" class="hidden" />
+            </label>
+            <button id="btnFillSampleBulkRows" type="button" style="background:#334155;color:#fff;"
+              class="tap-btn px-3 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold">
+              إدراج مثال جاهز للتجربة
+            </button>
+          </div>
+
+          <div>
+            <label for="bulkPasteTextarea" class="block text-xs font-bold text-slate-300 mb-1">
+              أو الصق السطور هنا مباشرة (الترتيب: اسم_الطالب, هاتف_الطالب, اسم_ولي_الأمر, هاتف_ولي_الأمر, كود_المجموعة, قيمة_الاشتراك)
+            </label>
+            <textarea id="bulkPasteTextarea" rows="5"
+              placeholder="مثال:&#10;عمر خالد سعيد,01011122233,خالد سعيد,01011122244,G01,250&#10;سارة محمود نبيل,01055566677,محمود نبيل,01055566688,G02,300"
+              class="w-full rounded-xl bg-slate-900 border border-slate-700 p-3 text-xs text-white font-mono"></textarea>
+          </div>
+
+          <button id="btnExecuteBulkImport" type="button" style="background:#4f46e5;color:#fff;width:100%;margin-top:8px;"
+            class="tap-btn w-full rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-extrabold py-3 text-sm shadow">
+            تنفيذ الرفع الجماعي وتوليد الأكواد الآن
+          </button>
+
+          <div id="bulkImportResultBox" class="hidden rounded-xl bg-slate-900 border border-emerald-500/40 p-3 text-xs text-emerald-300"></div>
+        </div>
+      </section>
+
+      <!-- =================================================================== -->
+      <!-- تبويب 6: لوحة التحكم والخزينة والمصروفات وتقرير المتأخرات -->
+      <!-- =================================================================== -->
+      <section id="tabDashboard" class="tab-panel hidden space-y-4">
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;">
+          <div class="glass-card rounded-2xl p-3.5 border-r-4 border-blue-500">
+            <div class="text-[11px] text-slate-400">إجمالي الطلاب المسجلين</div>
+            <div id="kpiStudentsCount" class="text-2xl font-extrabold text-white mt-1">0</div>
+            <div id="kpiEnrollmentsCount" class="text-[11px] text-blue-300 mt-0.5">0 اشتراك درس</div>
+          </div>
+          <div class="glass-card rounded-2xl p-3.5 border-r-4 border-emerald-500">
+            <div class="text-[11px] text-slate-400">إجمالي التحصيل (الوارد)</div>
+            <div id="kpiTotalIncome" class="text-2xl font-extrabold text-emerald-400 mt-1">0 ج.م</div>
+            <div class="text-[11px] text-slate-400 mt-0.5">خزينة السنتر</div>
+          </div>
+          <div class="glass-card rounded-2xl p-3.5 border-r-4 border-rose-500">
+            <div class="text-[11px] text-slate-400">إجمالي المصروفات (الصادر)</div>
+            <div id="kpiTotalExpense" class="text-2xl font-extrabold text-rose-400 mt-1">0 ج.م</div>
+            <div class="text-[11px] text-slate-400 mt-0.5">مصروفات التشغيل</div>
+          </div>
+          <div class="glass-card rounded-2xl p-3.5 border-r-4 border-amber-500">
+            <div class="text-[11px] text-slate-400">صافي رصيد الخزينة الحالي</div>
+            <div id="kpiNetBalance" class="text-2xl font-extrabold text-amber-300 mt-1">0 ج.م</div>
+            <div id="kpiUnpaidDuesCount" class="text-[11px] text-amber-400 mt-0.5">0 شهر غير مسدد</div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;">
+          <div class="glass-card rounded-2xl p-4 space-y-3">
+            <h4 class="text-sm font-extrabold text-white">تسجيل مصروف جديد من الخزينة</h4>
+            <div class="grid grid-cols-2 gap-2" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+              <select id="expCategoryInput" class="rounded-xl bg-slate-900 border border-slate-700 px-3 py-2 text-xs text-white font-bold">
+                <option value="إيجار ومرافق">إيجار ومرافق</option>
+                <option value="مطبوعات وكارنيهات">مطبوعات وكارنيهات</option>
+                <option value="أجور وسكرتارية">أجور وسكرتارية</option>
+                <option value="ضيافة ونظافة">ضيافة ونظافة</option>
+                <option value="أخرى">أخرى</option>
+              </select>
+              <input id="expAmountInput" type="number" min="1" placeholder="المبلغ (ج.م)"
+                class="rounded-xl bg-slate-900 border border-slate-700 px-3 py-2 text-xs text-white font-bold" />
+            </div>
+            <input id="expDescInput" type="text" placeholder="بيان المصروف..." style="margin-bottom:8px;"
+              class="w-full rounded-xl bg-slate-900 border border-slate-700 px-3 py-2 text-xs text-white" />
+            <button id="btnAddExpense" type="button" style="background:#e11d48;color:#fff;width:100%;"
+              class="tap-btn w-full rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-extrabold py-2.5 text-xs">
+              حفظ المصروف وخصمه من الخزينة
+            </button>
+          </div>
+
+          <div class="glass-card rounded-2xl p-4 space-y-3">
+            <h4 class="text-sm font-extrabold text-white">توليد استحقاقات شهرية مرنة (Module14)</h4>
+            <p class="text-[11px] text-slate-300">يولّد مطالبات شهر جديد لكل الدروس النشطة (مع إمكانية تعديل مبلغ الشهر لو تغير).</p>
+            <div class="grid grid-cols-2 gap-2" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+              <input id="billingMonthInput" type="month"
+                class="rounded-xl bg-slate-900 border border-slate-700 px-3 py-2 text-xs text-white font-bold" />
+              <input id="billingOverrideAmount" type="number" placeholder="مبلغ موحد اختياري"
+                class="rounded-xl bg-slate-900 border border-slate-700 px-3 py-2 text-xs text-white" />
+            </div>
+            <button id="btnGenerateMonthlyBilling" type="button" style="background:#d97706;color:#fff;width:100%;"
+              class="tap-btn w-full rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-extrabold py-2.5 text-xs">
+              توليد استحقاقات الشهر لكل المشتركين
+            </button>
+          </div>
+        </div>
+
+        <div class="glass-card rounded-2xl p-4 space-y-3">
+          <h4 class="text-sm font-extrabold text-amber-300">كشف المتأخرات (شهور حضر فيها الطالب ولم تُسدَّد بعد)</h4>
+          <div class="overflow-x-auto">
+            <table class="w-full text-right text-xs">
+              <thead class="bg-slate-900 text-slate-300">
+                <tr>
+                  <th class="p-2">كود الدرس</th>
+                  <th class="p-2">الطالب</th>
+                  <th class="p-2">المادة / المدرس</th>
+                  <th class="p-2">الشهر المتأخر</th>
+                  <th class="p-2">المتبقي</th>
+                  <th class="p-2">سداد سريع / واتساب</th>
+                </tr>
+              </thead>
+              <tbody id="unpaidDuesTableBody" class="divide-y divide-slate-800"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- =================================================================== -->
+      <!-- تبويب 7: النسخ الاحتياطي + مسارا التفريغ + الربط السحابي (بدون كمبيوتر) -->
+      <!-- =================================================================== -->
+      <section id="tabAdminCloud" class="tab-panel hidden space-y-4">
+        <div class="glass-card rounded-2xl p-4 border border-emerald-500/40 space-y-3">
+          <h3 class="text-base font-extrabold text-emerald-300">1. النسخ الاحتياطي الفوري واستعادة البيانات</h3>
+          <p class="text-xs text-slate-300">احفظ نسخة احتياطية كاملة في أي لحظة على موبايلك أو على Google Drive بضغطة زر.</p>
+          <div class="flex flex-wrap gap-2" style="display:flex;gap:8px;flex-wrap:wrap;">
+            <button id="btnDownloadBackupJson" type="button" style="background:#059669;color:#fff;"
+              class="tap-btn px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-extrabold shadow">
+              تحميل نسخة احتياطية كاملة على الموبايل (.json)
+            </button>
+            <button id="btnCloudBackupDrive" type="button" style="background:#0f766e;color:#fff;"
+              class="tap-btn px-4 py-2.5 rounded-xl bg-teal-700 hover:bg-teal-600 text-white text-xs font-extrabold">
+              إنشاء نسخة احتياطية على Google Drive
+            </button>
+            <label style="background:#334155;color:#fff;" class="tap-btn px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold cursor-pointer inline-flex items-center">
+              <span>استعادة من ملف نسخة احتياطية</span>
+              <input id="restoreBackupFileInput" type="file" accept=".json" class="hidden" />
+            </label>
+          </div>
+        </div>
+
+        <div class="glass-card rounded-2xl p-4 border border-rose-500/40 space-y-4">
+          <div>
+            <h3 class="text-base font-extrabold text-rose-300">2. تفريغ البيانات الآمن (بمسارين منفصلين)</h3>
+            <p class="text-xs text-slate-300">يأخذ النظام نسخة احتياطية تلقائية قبل أي تفريغ، ويطلب كلمة تأكيد لمنع المسح بالخطأ.</p>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;">
+            <!-- المسار الأول: تفريغ الحركات والمدفوعات فقط -->
+            <div class="bg-slate-900/90 p-3.5 rounded-xl border border-amber-500/40 space-y-2">
+              <span class="px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 text-[11px] font-extrabold">المسار الأول (موصى به لبداية شهر/فصل)</span>
+              <h4 class="text-sm font-extrabold text-white">تفريغ المدفوعات والحركات فقط</h4>
+              <p class="text-[11px] text-slate-300">يمسح: المدفوعات، الحضور والغياب، المحاضرات، المصروفات، الخزينة، الاستحقاقات، والامتحانات. <strong class="text-emerald-300">ويُبقي بيانات الطلاب واشتراكاتهم في المواد وأكواد الدروس كما هي.</strong></p>
+              <input id="confirmClearTransInput" type="text" placeholder="اكتب هنا: مسح الحركات" style="margin-bottom:8px;"
+                class="w-full rounded-lg bg-slate-800 border border-slate-700 px-3 py-2 text-xs text-white" />
+              <button id="btnExecClearTransactions" type="button" style="background:#d97706;color:#fff;width:100%;"
+                class="tap-btn w-full rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-extrabold py-2.5 text-xs">
+                تنفيذ تفريغ الحركات (مع بقاء الطلاب وأكواد الدروس)
+              </button>
+            </div>
+
+            <!-- المسار الثاني: التفريغ الشامل -->
+            <div class="bg-slate-900/90 p-3.5 rounded-xl border border-rose-500/40 space-y-2">
+              <span class="px-2 py-0.5 rounded bg-rose-500/20 text-rose-300 text-[11px] font-extrabold">المسار الثاني (تصفير كامل)</span>
+              <h4 class="text-sm font-extrabold text-white">التفريغ الشامل لكل البيانات</h4>
+              <p class="text-[11px] text-slate-300">يمسح كل الجداول (الطلاب، الاشتراكات، المجموعات، المدرسين، المدفوعات، الحضور، الخزينة) ويعيد النظام فارغاً مع الإبقاء على حساب الأدمن (<strong class="text-blue-300">mrk / 1510</strong>).</p>
+              <input id="confirmClearAllInput" type="text" placeholder="اكتب هنا: مسح شامل" style="margin-bottom:8px;"
+                class="w-full rounded-lg bg-slate-800 border border-slate-700 px-3 py-2 text-xs text-white" />
+              <button id="btnExecClearAll" type="button" style="background:#be123c;color:#fff;width:100%;"
+                class="tap-btn w-full rounded-xl bg-rose-700 hover:bg-rose-600 text-white font-extrabold py-2.5 text-xs">
+                تنفيذ التفريغ الشامل بالكامل
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="glass-card rounded-2xl p-4 border border-blue-500/40 space-y-3">
+          <h3 class="text-base font-extrabold text-blue-300">3. الربط السحابي (Google Sheets + GitHub Pages) من الموبايل</h3>
+          <p class="text-xs text-slate-300">ضع رابط Web App الخاص بـ Google Apps Script هنا لتفعيل المزامنة السحابية التلقائية بين موبايلك وقاعدة بيانات Google Sheets.</p>
+
+          <div class="flex flex-col sm:flex-row gap-2" style="display:flex;gap:8px;flex-wrap:wrap;">
+            <input id="gasWebAppUrlInput" type="url" placeholder="https://script.google.com/macros/s/....../exec" style="flex:1;min-width:220px;"
+              class="flex-1 rounded-xl bg-slate-900 border border-slate-700 px-3 py-2.5 text-xs text-white font-mono" />
+            <button id="btnSaveGasUrl" type="button" style="background:#2563eb;color:#fff;"
+              class="tap-btn px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-extrabold">
+              حفظ الرابط ومزامنة الآن
+            </button>
+            <button id="btnPullFromCloud" type="button" style="background:#334155;color:#fff;"
+              class="tap-btn px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold">
+              سحب البيانات من الشيت
+            </button>
+          </div>
+
+          <div class="pt-3 border-t border-slate-800 flex flex-wrap gap-2" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;">
+            <button id="btnCopyGasCode" type="button" style="background:#4f46e5;color:#fff;"
+              class="tap-btn px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-extrabold">
+              نسخ كود Google Apps Script (Code.gs) بالكامل بضغطة واحدة
+            </button>
+            <button id="btnDownloadSelfHtml" type="button" style="background:#1e293b;color:#fcd34d;"
+              class="tap-btn px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-300 text-xs font-bold border border-amber-500/30">
+              تحميل ملف index.html لرفعه على GitHub
+            </button>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- منطقة الطباعة المخفية -->
+  <div id="printArea" class="hidden p-4 bg-white text-black"></div>
+
+  <script>
+    const STORAGE_KEY = "ABAKERA_CENTER_DB_V1";
+    const GAS_URL_KEY = "ABAKERA_GAS_WEBAPP_URL";
+
+    let currentSession = {
+      loggedIn: false,
+      userId: "U001",
+      username: "mrk",
+      fullName: "محمد السعيد (مالك النظام)",
+      role: "مالك النظام"
+    };
+
+    let activePaySelection = null;
+    let lastCompletedPayment = null;
+    let activeLectureId = null;
+    let studentEntryMode = "new";
+    let payHtml5QrCode = null;
+    let attHtml5QrCode = null;
+
+    function createInitialDatabase() {
+      return {
+        الإعدادات: [
+          { المفتاح: "اسم_السنتر", القيمة: "سنتر العباقرة التعليمي", الوصف: "الاسم الرسمي للسنتر", آخر_تحديث: "2026-11-12" },
+          { المفتاح: "الشهر_الحالي", القيمة: "2026-11", الوصف: "الشهر النشط للتحصيل", آخر_تحديث: "2026-11-12" }
+        ],
+        الأعوام_الدراسية: [
+          { كود_العام: "Y2026", اسم_العام: "2026 / 2027", تاريخ_البداية: "2026-09-01", تاريخ_النهاية: "2027-06-30", نشط: "نعم" }
+        ],
+        الفصول_الدراسية: [
+          { كود_الفصل: "SEM1", كود_العام: "Y2026", اسم_الفصل: "الفصل الدراسي الأول", نشط: "نعم" }
+        ],
+        الفروع: [
+          { كود_الفرع: "B01", اسم_الفرع: "الفرع الرئيسي - سنتر العباقرة", العنوان: "تيرة - الدقهلية", الهاتف: "01000000000", نشط: "نعم" }
+        ],
+        القاعات: [
+          { كود_القاعة: "R01", كود_الفرع: "B01", اسم_القاعة: "قاعة 1 الكبرى", السعة: "80", نشط: "نعم" },
+          { كود_القاعة: "R02", كود_الفرع: "B01", اسم_القاعة: "قاعة 2 المتوسطة", السعة: "50", نشط: "نعم" }
+        ],
+        الصفوف_الدراسية: [
+          { كود_الصف: "GR1", اسم_الصف: "الأول الثانوي", المرحلة: "ثانوي", نشط: "نعم" },
+          { كود_الصف: "GR2", اسم_الصف: "الثاني الثانوي", المرحلة: "ثانوي", نشط: "نعم" },
+          { كود_الصف: "GR3", اسم_الصف: "الثالث الثانوي", المرحلة: "ثانوي", نشط: "نعم" },
+          { كود_الصف: "PREP3", اسم_الصف: "الثالث الإعدادي", المرحلة: "إعدادي", نشط: "نعم" }
+        ],
+        المواد_الدراسية: [
+          { كود_المادة: "SUB_MATH", اسم_المادة: "الرياضيات", الاختصار: "MATH", نشط: "نعم" },
+          { كود_المادة: "SUB_PHYS", اسم_المادة: "الفيزياء", الاختصار: "PHYS", نشط: "نعم" },
+          { كود_المادة: "SUB_AR", اسم_المادة: "اللغة العربية", الاختصار: "AR", نشط: "نعم" },
+          { كود_المادة: "SUB_ENG", اسم_المادة: "اللغة الإنجليزية", الاختصار: "ENG", نشط: "نعم" }
+        ],
+        المدرسون: [
+          { كود_المدرس: "T01", اسم_المدرس: "أ. محمود الشافعي", كود_المادة: "SUB_MATH", رقم_الهاتف: "01012345671", نسبة_المدرس: "70", نشط: "نعم" },
+          { كود_المدرس: "T02", اسم_المدرس: "أ. حسام عبد الرحمن", كود_المادة: "SUB_PHYS", رقم_الهاتف: "01012345672", نسبة_المدرس: "70", نشط: "نعم" },
+          { كود_المدرس: "T03", اسم_المدرس: "أ. إبراهيم المنشاوي", كود_المادة: "SUB_AR", رقم_الهاتف: "01012345673", نسبة_المدرس: "75", نشط: "نعم" }
+        ],
+        المجموعات: [
+          { كود_المجموعة: "G01", اسم_المجموعة: "رياضيات 1ث - سبت وثلاثاء 4م", كود_الصف: "GR1", كود_المادة: "SUB_MATH", كود_المدرس: "T01", كود_القاعة: "R01", الأيام: "سبت وثلاثاء", الموعد: "04:00 م", الاشتراك_الشهري: "250", نشط: "نعم" },
+          { كود_المجموعة: "G02", اسم_المجموعة: "فيزياء 1ث - أحد وأربعاء 5م", كود_الصف: "GR1", كود_المادة: "SUB_PHYS", كود_المدرس: "T02", كود_القاعة: "R02", الأيام: "أحد وأربعاء", الموعد: "05:00 م", الاشتراك_الشهري: "280", نشط: "نعم" },
+          { كود_المجموعة: "G03", اسم_المجموعة: "عربي 3ع - اثنين وخميس 3م", كود_الصف: "PREP3", كود_المادة: "SUB_AR", كود_المدرس: "T03", كود_القاعة: "R01", الأيام: "اثنين وخميس", الموعد: "03:00 م", الاشتراك_الشهري: "200", نشط: "نعم" },
+          { كود_المجموعة: "G04", اسم_المجموعة: "رياضيات 1ث (مجموعة إضافية) - أحد وأربعاء 6م", كود_الصف: "GR1", كود_المادة: "SUB_MATH", كود_المدرس: "T01", كود_القاعة: "R01", الأيام: "أحد وأربعاء", الموعد: "06:00 م", الاشتراك_الشهري: "250", نشط: "نعم" }
+        ],
+        أولياء_الأمور: [
+          { كود_ولي_الأمر: "P1001", اسم_ولي_الأمر: "السعيد أحمد جاد", رقم_الواتساب: "201011122233", صلة_القرابة: "الأب", ملاحظات: "" },
+          { كود_ولي_الأمر: "P1002", اسم_ولي_الأمر: "مصطفى كامل زكي", رقم_الواتساب: "201022233344", صلة_القرابة: "الأب", ملاحظات: "" }
+        ],
+        الطلاب: [
+          { كود_الطالب: "S1001", اسم_الطالب: "يوسف السعيد أحمد جاد", كود_الصف: "GR1", هاتف_الطالب: "01011122233", كود_ولي_الأمر: "P1001", هاتف_ولي_الأمر: "201011122233", تاريخ_التسجيل: "2026-09-15", الحالة: "نشط", ملاحظات: "" },
+          { كود_الطالب: "S1002", اسم_الطالب: "مريم مصطفى كامل زكي", كود_الصف: "GR1", هاتف_الطالب: "01022233344", كود_ولي_الأمر: "P1002", هاتف_ولي_الأمر: "201022233344", تاريخ_التسجيل: "2026-09-18", الحالة: "نشط", ملاحظات: "" }
+        ],
+        اشتراكات_الطلاب: [
+          { كود_الاشتراك: "EN1001", كود_الدرس: "L1001", كود_الطالب: "S1001", كود_المجموعة: "G01", كود_المادة: "SUB_MATH", كود_المدرس: "T01", قيمة_الاشتراك: "250", تاريخ_الاشتراك: "2026-09-15", الحالة: "نشط" },
+          { كود_الاشتراك: "EN1002", كود_الدرس: "L1002", كود_الطالب: "S1001", كود_المجموعة: "G02", كود_المادة: "SUB_PHYS", كود_المدرس: "T02", قيمة_الاشتراك: "280", تاريخ_الاشتراك: "2026-09-15", الحالة: "نشط" },
+          { كود_الاشتراك: "EN1003", كود_الدرس: "L1003", كود_الطالب: "S1002", كود_المجموعة: "G01", كود_المادة: "SUB_MATH", كود_المدرس: "T01", قيمة_الاشتراك: "250", تاريخ_الاشتراك: "2026-09-18", الحالة: "نشط" }
+        ],
+        المحاضرات: [
+          { كود_المحاضرة: "LEC101", كود_المجموعة: "G01", التاريخ: "2026-10-06", الشهر: "2026-10", عنوان_الحصة: "حصة شهر أكتوبر - جبر", مسجل_بواسطة: "mrk" },
+          { كود_المحاضرة: "LEC102", كود_المجموعة: "G01", التاريخ: "2026-11-03", الشهر: "2026-11", عنوان_الحصة: "حصة شهر نوفمبر - حساب مثلثات", مسجل_بواسطة: "mrk" },
+          { كود_المحاضرة: "LEC103", كود_المجموعة: "G02", التاريخ: "2026-11-04", الشهر: "2026-11", عنوان_الحصة: "حصة فيزياء - قوانين الحركة", مسجل_بواسطة: "mrk" }
+        ],
+        الحضور_والغياب: [
+          { كود_السجل: "ATT1001", كود_المحاضرة: "LEC101", كود_المجموعة: "G01", كود_الدرس: "L1001", كود_الطالب: "S1001", التاريخ: "2026-10-06", الشهر: "2026-10", الحالة: "حاضر", وقت_التسجيل: "16:05" },
+          { كود_السجل: "ATT1002", كود_المحاضرة: "LEC102", كود_المجموعة: "G01", كود_الدرس: "L1001", كود_الطالب: "S1001", التاريخ: "2026-11-03", الشهر: "2026-11", الحالة: "حاضر", وقت_التسجيل: "16:02" },
+          { كود_السجل: "ATT1003", كود_المحاضرة: "LEC103", كود_المجموعة: "G02", كود_الدرس: "L1002", كود_الطالب: "S1001", التاريخ: "2026-11-04", الشهر: "2026-11", الحالة: "حاضر", وقت_التسجيل: "17:00" },
+          { كود_السجل: "ATT1004", كود_المحاضرة: "LEC101", كود_المجموعة: "G01", كود_الدرس: "L1003", كود_الطالب: "S1002", التاريخ: "2026-10-06", الشهر: "2026-10", الحالة: "حاضر", وقت_التسجيل: "16:06" },
+          { كود_السجل: "ATT1005", كود_المحاضرة: "LEC102", كود_المجموعة: "G01", كود_الدرس: "L1003", كود_الطالب: "S1002", التاريخ: "2026-11-03", الشهر: "2026-11", الحالة: "حاضر", وقت_التسجيل: "16:04" }
+        ],
+        الاستحقاقات_الشهرية: [
+          { كود_الاستحقاق: "DUE1001", كود_الدرس: "L1001", كود_الطالب: "S1001", كود_المجموعة: "G01", الشهر: "2026-10", المبلغ_المطلوب: "250", المبلغ_المسدد: "0", المتبقي: "250", الحالة: "غير مسدد", تاريخ_التحديث: "2026-10-06" },
+          { كود_الاستحقاق: "DUE1002", كود_الدرس: "L1001", كود_الطالب: "S1001", كود_المجموعة: "G01", الشهر: "2026-11", المبلغ_المطلوب: "250", المبلغ_المسدد: "0", المتبقي: "250", الحالة: "غير مسدد", تاريخ_التحديث: "2026-11-03" },
+          { كود_الاستحقاق: "DUE1003", كود_الدرس: "L1002", كود_الطالب: "S1001", كود_المجموعة: "G02", الشهر: "2026-11", المبلغ_المطلوب: "280", المبلغ_المسدد: "0", المتبقي: "280", الحالة: "غير مسدد", تاريخ_التحديث: "2026-11-04" },
+          { كود_الاستحقاق: "DUE1004", كود_الدرس: "L1003", كود_الطالب: "S1002", كود_المجموعة: "G01", الشهر: "2026-10", المبلغ_المطلوب: "250", المبلغ_المسدد: "250", المتبقي: "0", الحالة: "مسدد", تاريخ_التحديث: "2026-10-10" },
+          { كود_الاستحقاق: "DUE1005", كود_الدرس: "L1003", كود_الطالب: "S1002", كود_المجموعة: "G01", الشهر: "2026-11", المبلغ_المطلوب: "250", المبلغ_المسدد: "0", المتبقي: "250", الحالة: "غير مسدد", تاريخ_التحديث: "2026-11-03" }
+        ],
+        المدفوعات: [
+          { رقم_الإيصال: "REC-1001", كود_الدرس: "L1003", كود_الطالب: "S1002", كود_المجموعة: "G01", الشهر_المسدد: "2026-10", المبلغ: "250", تاريخ_الدفع: "2026-10-10", طريقة_الدفع: "نقدي", المستلم: "mrk", ملاحظات: "سداد شهر أكتوبر" }
+        ],
+        المصروفات: [
+          { كود_المصروف: "EXP-101", الفئة: "مطبوعات وكارنيهات", البيان: "طباعة دفعة كارنيهات أولى ثانوي", المبلغ: "120", التاريخ: "2026-10-12", الشهر: "2026-10", الصارف: "mrk", ملاحظات: "" }
+        ],
+        الخزينة: [
+          { كود_الحركة: "TR-1001", نوع_الحركة: "تحصيل اشتراك", المرجع: "REC-1001", البيان: "تحصيل درس L1003 - مريم مصطفى (2026-10)", وارد: "250", صادر: "0", الرصيد_اللحظي: "250", التاريخ: "2026-10-10", المستخدم: "mrk" },
+          { كود_الحركة: "TR-1002", نوع_الحركة: "مصروفات", المرجع: "EXP-101", البيان: "طباعة دفعة كارنيهات أولى ثانوي", وارد: "0", صادر: "120", الرصيد_اللحظي: "130", التاريخ: "2026-10-12", المستخدم: "mrk" }
+        ],
+        الامتحانات: [],
+        نتائج_الامتحانات: [],
+        تسويات_المدرسين: [],
+        المستخدمون: [
+          { كود_المستخدم: "U001", اسم_المستخدم: "mrk", كلمة_المرور: "1510", الاسم_الكامل: "محمد السعيد (مالك النظام)", الدور: "مالك النظام", نشط: "نعم" },
+          { كود_المستخدم: "U002", اسم_المستخدم: "sec", كلمة_المرور: "1234", الاسم_الكامل: "سكرتير السنتر", الدور: "سكرتير", نشط: "نعم" }
+        ],
+        سجل_العمليات: [],
+        _pendingSyncCount: 0
+      };
+    }
+
+    let db = createInitialDatabase();
+
+    function loadDatabaseFromStorage() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (parsed && parsed.المستخدمون) {
+            db = parsed;
+            ensureAdminAccountInMemory();
+            return;
+          }
+        }
+      } catch (e) {}
+      db = createInitialDatabase();
+      saveDatabaseToStorage(false);
+    }
+
+    function ensureAdminAccountInMemory() {
+      if (!Array.isArray(db.المستخدمون)) db.المستخدمون = [];
+      const hasAdmin = db.المستخدمون.some(u => String(u.اسم_المستخدم).trim().toLowerCase() === "mrk");
+      if (!hasAdmin) {
+        db.المستخدمون.unshift({
+          كود_المستخدم: "U001",
+          اسم_المستخدم: "mrk",
+          كلمة_المرور: "1510",
+          الاسم_الكامل: "محمد السعيد (مالك النظام)",
+          الدور: "مالك النظام",
+          نشط: "نعم"
+        });
+      }
+    }
+
+    function saveDatabaseToStorage(incrementSync = true) {
+      if (incrementSync) {
+        db._pendingSyncCount = (Number(db._pendingSyncCount) || 0) + 1;
+      }
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(db));
+      } catch (e) {}
+      updateSyncBadgeUI();
+    }
+
+    function updateSyncBadgeUI() {
+      const badge = document.getElementById("pendingSyncBadge");
+      if (badge) {
+        badge.textContent = String(Number(db._pendingSyncCount) || 0);
+      }
+    }
+
+    function playBeep(freq = 880, durationMs = 120) {
+      try {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtx) return;
+        const ctx = new AudioCtx();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = "sine";
+        osc.frequency.value = freq;
+        gain.gain.value = 0.12;
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start();
+        setTimeout(() => {
+          osc.stop();
+          ctx.close();
+        }, durationMs);
+      } catch (e) {}
+    }
+
+    function showToast(message, type = "success") {
+      const container = document.getElementById("toastContainer");
+      if (!container) return;
+      const el = document.createElement("div");
+      const colorClasses = type === "error"
+        ? "bg-rose-900/95 border-rose-500 text-rose-100"
+        : type === "warning"
+        ? "bg-amber-900/95 border-amber-500 text-amber-100"
+        : "bg-emerald-900/95 border-emerald-500 text-emerald-100";
+      el.className = `pointer-events-auto rounded-xl border px-4 py-3 text-xs font-extrabold shadow-xl transition-all ${colorClasses}`;
+      el.style.cssText = "background:#065f46;color:#fff;padding:10px 14px;border-radius:10px;margin-bottom:6px;font-weight:700;";
+      el.textContent = message;
+      container.appendChild(el);
+      setTimeout(() => {
+        el.remove();
+      }, 3800);
+    }
+
+    function nextCode(prefix, list, keyName, startNumber = 1001) {
+      let maxNum = startNumber - 1;
+      (list || []).forEach(item => {
+        const val = String(item[keyName] || "");
+        const digits = val.replace(/\D+/g, "");
+        if (digits) {
+          const n = parseInt(digits, 10);
+          if (!isNaN(n) && n > maxNum) maxNum = n;
+        }
+      });
+      return prefix + String(maxNum + 1);
+    }
+
+    function getOrCreateLessonCode(studentId, subjectId, teacherId) {
+      const existing = (db.اشتراكات_الطلاب || []).find(en =>
+        String(en.كود_الطالب).trim() === String(studentId).trim() &&
+        String(en.كود_المادة).trim() === String(subjectId).trim() &&
+        String(en.كود_المدرس).trim() === String(teacherId).trim()
+      );
+      if (existing && existing.كود_الدرس) {
+        return existing.كود_الدرس;
+      }
+      return nextCode("L", db.اشتراكات_الطلاب, "كود_الدرس", 1001);
+    }
+
+    function resolveLessonByCode(lessonCodeInput) {
+      const code = String(lessonCodeInput || "").trim().toUpperCase();
+      if (!code) return null;
+      const enrollment = (db.اشتراكات_الطلاب || []).find(e => String(e.كود_الدرس).trim().toUpperCase() === code);
+      if (!enrollment) return null;
+
+      const student = (db.الطلاب || []).find(s => s.كود_الطالب === enrollment.كود_الطالب) || {};
+      const group = (db.المجموعات || []).find(g => g.كود_المجموعة === enrollment.كود_المجموعة) || {};
+      const subject = (db.المواد_الدراسية || []).find(sub => sub.كود_المادة === enrollment.كود_المادة) || {};
+      const teacher = (db.المدرسون || []).find(t => t.كود_المدرس === enrollment.كود_المدرس) || {};
+      const grade = (db.الصفوف_الدراسية || []).find(gr => gr.كود_الصف === student.كود_الصف) || {};
+
+      return {
+        lessonCode: enrollment.كود_الدرس,
+        enrollment,
+        student,
+        group,
+        subject,
+        teacher,
+        grade
+      };
+    }
+
+    function calculateOldestUnpaidMonth(lessonCode) {
+      const info = resolveLessonByCode(lessonCode);
+      if (!info) return null;
+
+      const standardFee = Number(info.enrollment.قيمة_الاشتراك || info.group.الاشتراك_الشهري || 250);
+      const currentMonthSetting = ((db.الإعدادات || []).find(s => s.المفتاح === "الشهر_الحالي") || {}).القيمة || new Date().toISOString().slice(0, 7);
+
+      const attendedMonthsSet = new Set();
+      (db.الحضور_والغياب || []).forEach(att => {
+        if (String(att.كود_الدرس).toUpperCase() === info.lessonCode.toUpperCase() && att.الحالة === "حاضر" && att.الشهر) {
+          attendedMonthsSet.add(att.الشهر);
+        }
+      });
+
+      (db.الاستحقاقات_الشهرية || []).forEach(due => {
+        if (String(due.كود_الدرس).toUpperCase() === info.lessonCode.toUpperCase() && due.الشهر) {
+          attendedMonthsSet.add(due.الشهر);
+        }
+      });
+
+      const candidateMonths = Array.from(attendedMonthsSet).sort();
+
+      function getPaidForMonth(monthStr) {
+        return (db.المدفوعات || [])
+          .filter(p => String(p.كود_الدرس).toUpperCase() === info.lessonCode.toUpperCase() && p.الشهر_المسدد === monthStr)
+          .reduce((sum, p) => sum + (Number(p.المبلغ) || 0), 0);
+      }
+
+      function getRequiredForMonth(monthStr) {
+        const dueRec = (db.الاستحقاقات_الشهرية || []).find(
+          d => String(d.كود_الدرس).toUpperCase() === info.lessonCode.toUpperCase() && d.الشهر === monthStr
+        );
+        return dueRec ? Number(dueRec.المبلغ_المطلوب) : standardFee;
+      }
+
+      for (let i = 0; i < candidateMonths.length; i++) {
+        const m = candidateMonths[i];
+        const req = getRequiredForMonth(m);
+        const paid = getPaidForMonth(m);
+        if (paid < req) {
+          return {
+            month: m,
+            requiredAmount: req - paid,
+            fullFee: req,
+            alreadyPaid: paid,
+            reason: `أقدم شهر مسجل فيه حضور ولم يُسدَّد (${m})`,
+            isArrears: true
+          };
+        }
+      }
+
+      const currentPaid = getPaidForMonth(currentMonthSetting);
+      const currentReq = getRequiredForMonth(currentMonthSetting);
+      if (currentPaid < currentReq) {
+        return {
+          month: currentMonthSetting,
+          requiredAmount: currentReq - currentPaid,
+          fullFee: currentReq,
+          alreadyPaid: currentPaid,
+          reason: `الشهر الحالي (${currentMonthSetting}) — لا توجد متأخرات سابقة`,
+          isArrears: false
+        };
+      }
+
+      const [yr, mo] = currentMonthSetting.split("-").map(Number);
+      const nextDate = new Date(yr, mo, 1);
+      const nextMonthStr = `${nextDate.getFullYear()}-${String(nextDate.getMonth() + 1).padStart(2, "0")}`;
+      return {
+        month: nextMonthStr,
+        requiredAmount: standardFee,
+        fullFee: standardFee,
+        alreadyPaid: 0,
+        reason: `سداد مقدم للشهر القادم (${nextMonthStr}) — كل الشهور السابقة مسددة`,
+        isArrears: false
+      };
+    }
+
+    function handleFastPayLookup(rawCode) {
+      const code = String(rawCode || "").trim().toUpperCase();
+      if (!code) {
+        showToast("يرجى لقط الكارنيه أو كتابة كود الدرس أولاً", "warning");
+        return;
+      }
+
+      const info = resolveLessonByCode(code);
+      if (!info) {
+        playBeep(240, 220);
+        showToast(`كود الدرس (${code}) غير موجود في النظام!`, "error");
+        document.getElementById("fastPayConfirmCard").classList.add("hidden");
+        return;
+      }
+
+      const dueCalc = calculateOldestUnpaidMonth(code);
+      activePaySelection = {
+        ...info,
+        dueCalc
+      };
+
+      playBeep(920, 100);
+      document.getElementById("fastPayLessonInput").value = info.lessonCode;
+      document.getElementById("postPaymentCard").classList.add("hidden");
+
+      const confirmCard = document.getElementById("fastPayConfirmCard");
+      confirmCard.classList.remove("hidden");
+
+      document.getElementById("payCardStudentName").textContent = info.student.اسم_الطالب || "طالب غير معروف";
+      document.getElementById("payCardLessonCode").textContent = info.lessonCode;
+      document.getElementById("payCardLessonInfo").textContent =
+        `${info.subject.اسم_المادة || ""} — ${info.teacher.اسم_المدرس || ""} | ${info.group.اسم_المجموعة || ""}`;
+      document.getElementById("payCardBadge").textContent = dueCalc.isArrears ? "تنبيه: شهر حضور غير مسدد" : "تحصيل الشهر الحالي";
+      document.getElementById("payCardTargetMonth").value = dueCalc.month;
+      document.getElementById("payCardMonthReason").textContent = dueCalc.reason;
+      document.getElementById("payCardAmount").value = dueCalc.requiredAmount;
+      document.getElementById("payCardHistoryNote").textContent =
+        dueCalc.alreadyPaid > 0 ? `سُدد جزء سابق (${dueCalc.alreadyPaid} ج.م) من إجمالي ${dueCalc.fullFee} ج.م` : `قيمة اشتراك الدرس: ${dueCalc.fullFee} ج.م`;
+      document.getElementById("payCardNotes").value = `سداد اشتراك ${info.subject.اسم_المادة || ""} (${dueCalc.month})`;
+    }
+
+    function confirmAndRecordFastPayment() {
+      if (!activePaySelection) return;
+
+      const targetMonth = document.getElementById("payCardTargetMonth").value;
+      const amount = Number(document.getElementById("payCardAmount").value);
+      const notes = document.getElementById("payCardNotes").value.trim();
+
+      if (!targetMonth || isNaN(amount) || amount <= 0) {
+        showToast("يرجى التأكد من الشهر والمبلغ بشكل صحيح", "error");
+        return;
+      }
+
+      const receiptNo = nextCode("REC-", db.المدفوعات, "رقم_الإيصال", 1001);
+      const todayStr = new Date().toISOString().slice(0, 10);
+
+      const paymentRow = {
+        رقم_الإيصال: receiptNo,
+        كود_الدرس: activePaySelection.lessonCode,
+        كود_الطالب: activePaySelection.student.كود_الطالب,
+        كود_المجموعة: activePaySelection.group.كود_المجموعة,
+        الشهر_المسدد: targetMonth,
+        المبلغ: String(amount),
+        تاريخ_الدفع: todayStr,
+        طريقة_الدفع: "نقدي (لقط QR)",
+        المستلم: currentSession.username,
+        ملاحظات: notes || `سداد شهر ${targetMonth}`
+      };
+      db.المدفوعات.unshift(paymentRow);
+
+      let dueRow = (db.الاستحقاقات_الشهرية || []).find(
+        d => String(d.كود_الدرس).toUpperCase() === activePaySelection.lessonCode.toUpperCase() && d.الشهر === targetMonth
+      );
+      const baseFee = Number(activePaySelection.enrollment.قيمة_الاشتراك || activePaySelection.group.الاشتراك_الشهري || amount);
+
+      if (!dueRow) {
+        const remaining = Math.max(0, baseFee - amount);
+        dueRow = {
+          كود_الاستحقاق: nextCode("DUE", db.الاستحقاقات_الشهرية, "كود_الاستحقاق", 1001),
+          كود_الدرس: activePaySelection.lessonCode,
+          كود_الطالب: activePaySelection.student.كود_الطالب,
+          كود_المجموعة: activePaySelection.group.كود_المجموعة,
+          الشهر: targetMonth,
+          المبلغ_المطلوب: String(baseFee),
+          المبلغ_المسدد: String(amount),
+          المتبقي: String(remaining),
+          الحالة: remaining === 0 ? "مسدد" : "مسدد جزئياً",
+          تاريخ_التحديث: todayStr
+        };
+        db.الاستحقاقات_الشهرية.push(dueRow);
+      } else {
+        const newPaid = (Number(dueRow.المبلغ_المسدد) || 0) + amount;
+        const req = Number(dueRow.المبلغ_المطلوب) || baseFee;
+        const rem = Math.max(0, req - newPaid);
+        dueRow.المبلغ_المسدد = String(newPaid);
+        dueRow.المتبقي = String(rem);
+        dueRow.الحالة = rem === 0 ? "مسدد" : "مسدد جزئياً";
+        dueRow.تاريخ_التحديث = todayStr;
+      }
+
+      const currentBalance = getNetTreasuryBalance();
+      db.الخزينة.push({
+        كود_الحركة: nextCode("TR-", db.الخزينة, "كود_الحركة", 1001),
+        نوع_الحركة: "تحصيل اشتراك",
+        المرجع: receiptNo,
+        البيان: `تحصيل درس ${activePaySelection.lessonCode} - ${activePaySelection.student.اسم_الطالب} (${targetMonth})`,
+        وارد: String(amount),
+        صادر: "0",
+        الرصيد_اللحظي: String(currentBalance + amount),
+        التاريخ: todayStr,
+        المستخدم: currentSession.username
+      });
+
+      recordAudit("تحصيل سريع QR", `إيصال ${receiptNo} | كود درس ${activePaySelection.lessonCode} | شهر ${targetMonth} | مبلغ ${amount} ج.م`);
+
+      lastCompletedPayment = {
+        receiptNo,
+        lessonCode: activePaySelection.lessonCode,
+        studentName: activePaySelection.student.اسم_الطالب,
+        guardianPhone: activePaySelection.student.هاتف_ولي_الأمر || activePaySelection.student.هاتف_الطالب,
+        subjectName: activePaySelection.subject.اسم_المادة,
+        teacherName: activePaySelection.teacher.اسم_المدرس,
+        groupName: activePaySelection.group.اسم_المجموعة,
+        month: targetMonth,
+        amount,
+        date: todayStr
+      };
+
+      saveDatabaseToStorage(true);
+      playBeep(1200, 160);
+
+      document.getElementById("fastPayConfirmCard").classList.add("hidden");
+      const postCard = document.getElementById("postPaymentCard");
+      postCard.classList.remove("hidden");
+      document.getElementById("postPaySummaryTitle").textContent =
+        `${lastCompletedPayment.studentName} — ${lastCompletedPayment.subjectName} (${lastCompletedPayment.month}) : ${lastCompletedPayment.amount} ج.م`;
+      document.getElementById("postPayReceiptNo").textContent = receiptNo;
+
+      renderAllViews();
+      showToast(`تم تسجيل الدفع (${amount} ج.م) لشهر ${targetMonth} بنجاح!`);
+    }
+
+    function sendPaymentWhatsApp(payObj) {
+      if (!payObj) return;
+      let phone = String(payObj.guardianPhone || "").replace(/\D+/g, "");
+      if (phone.startsWith("01")) phone = "2" + phone;
+      const msg =
+        `*سنتر العباقرة التعليمي* 📚\n` +
+        `تأكيد سداد اشتراك شهري ✅\n` +
+        `------------------------\n` +
+        `👤 الطالب: *${payObj.studentName}*\n` +
+        `🔖 كود الدرس: *${payObj.lessonCode}*\n` +
+        `📘 المادة: *${payObj.subjectName}* (${payObj.teacherName})\n` +
+        `📅 الشهر المسدد: *${payObj.month}*\n` +
+        `💰 المبلغ المدفوع: *${payObj.amount} ج.م*\n` +
+        `🧾 رقم الإيصال: *${payObj.receiptNo}*\n` +
+        `📆 التاريخ: ${payObj.date}\n` +
+        `------------------------\n` +
+        `شكراً لتعاونكم معنا 🌟`;
+      const url = `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
+      window.open(url, "_blank");
+    }
+
+    function printReceiptOnDemand(payObj) {
+      if (!payObj) return;
+      const printArea = document.getElementById("printArea");
+      printArea.innerHTML = `
+        <div style="max-width: 380px; margin: 10px auto; border: 2px solid #1e3a8a; border-radius: 12px; padding: 16px; font-family: 'Cairo', sans-serif; direction: rtl;">
+          <div style="text-align: center; border-bottom: 2px dashed #94a3b8; padding-bottom: 8px; margin-bottom: 10px;">
+            <h2 style="margin: 0; font-size: 18px; font-weight: 800; color: #1e3a8a;">سنتر العباقرة التعليمي</h2>
+            <p style="margin: 2px 0 0; font-size: 12px;">إيصال سداد اشتراك شهري — رقم: <strong>${payObj.receiptNo}</strong></p>
+          </div>
+          <div style="font-size: 13px; line-height: 1.8;">
+            <div><strong>اسم الطالب:</strong> ${payObj.studentName}</div>
+            <div><strong>كود الدرس:</strong> ${payObj.lessonCode}</div>
+            <div><strong>المادة والمدرس:</strong> ${payObj.subjectName} — ${payObj.teacherName}</div>
+            <div><strong>الشهر المسدد:</strong> ${payObj.month}</div>
+            <div><strong>المبلغ المسدد:</strong> ${payObj.amount} ج.م</div>
+            <div><strong>تاريخ السداد:</strong> ${payObj.date}</div>
+          </div>
+          <div style="margin-top: 12px; border-top: 1px solid #cbd5e1; padding-top: 6px; text-align: center; font-size: 11px; color: #475569;">
+            تم الإصدار آلياً من منظومة سنتر العباقرة التعليمي
+          </div>
+        </div>
+      `;
+      window.print();
+    }
+
+    function startGroupLectureAttendance() {
+      const groupId = document.getElementById("attGroupSelect").value;
+      const dateStr = document.getElementById("attDateInput").value || new Date().toISOString().slice(0, 10);
+      const titleStr = document.getElementById("attTitleInput").value.trim() || "حصة دراسية";
+
+      if (!groupId) {
+        showToast("يرجى اختيار المجموعة أولاً", "warning");
+        return;
+      }
+
+      const monthStr = dateStr.slice(0, 7);
+      let lecture = (db.المحاضرات || []).find(l => l.كود_المجموعة === groupId && l.التاريخ === dateStr);
+      if (!lecture) {
+        lecture = {
+          كود_المحاضرة: nextCode("LEC", db.المحاضرات, "كود_المحاضرة", 101),
+          كود_المجموعة: groupId,
+          التاريخ: dateStr,
+          الشهر: monthStr,
+          عنوان_الحصة: titleStr,
+          مسجل_بواسطة: currentSession.username
+        };
+        db.المحاضرات.push(lecture);
+      }
+      activeLectureId = lecture.كود_المحاضرة;
+
+      const groupEnrollments = (db.اشتراكات_الطلاب || []).filter(e => e.كود_المجموعة === groupId && e.الحالة === "نشط");
+      let addedCount = 0;
+
+      groupEnrollments.forEach(en => {
+        const exists = (db.الحضور_والغياب || []).some(
+          a => a.كود_المحاضرة === activeLectureId && a.كود_الدرس === en.كود_الدرس
+        );
+        if (!exists) {
+          db.الحضور_والغياب.push({
+            كود_السجل: nextCode("ATT", db.الحضور_والغياب, "كود_السجل", 1001),
+            كود_المحاضرة: activeLectureId,
+            كود_المجموعة: groupId,
+            كود_الدرس: en.كود_الدرس,
+            كود_الطالب: en.كود_الطالب,
+            التاريخ: dateStr,
+            الشهر: monthStr,
+            الحالة: "حاضر",
+            وقت_التسجيل: new Date().toTimeString().slice(0, 5)
+          });
+          addedCount++;
+        }
+        ensureMonthlyDueExists(en, monthStr);
+      });
+
+      saveDatabaseToStorage(true);
+      renderLectureAttendanceTable();
+      renderAllViews();
+      playBeep(900, 120);
+      showToast(`تم فتح الحصة (${activeLectureId}) وتسجيل ${groupEnrollments.length} طالب كحاضرين (${addedCount} سجل جديد). امسح الآن الغائبين فقط.`);
+    }
+
+    function ensureMonthlyDueExists(enrollment, monthStr) {
+      const exists = (db.الاستحقاقات_الشهرية || []).some(
+        d => String(d.كود_الدرس).toUpperCase() === String(enrollment.كود_الدرس).toUpperCase() && d.الشهر === monthStr
+      );
+      if (!exists) {
+        const fee = Number(enrollment.قيمة_الاشتراك || 250);
+        const paidSoFar = (db.المدفوعات || [])
+          .filter(p => String(p.كود_الدرس).toUpperCase() === String(enrollment.كود_الدرس).toUpperCase() && p.الشهر_المسدد === monthStr)
+          .reduce((s, p) => s + (Number(p.المبلغ) || 0), 0);
+        const rem = Math.max(0, fee - paidSoFar);
+        db.الاستحقاقات_الشهرية.push({
+          كود_الاستحقاق: nextCode("DUE", db.الاستحقاقات_الشهرية, "كود_الاستحقاق", 1001),
+          كود_الدرس: enrollment.كود_الدرس,
+          كود_الطالب: enrollment.كود_الطالب,
+          كود_المجموعة: enrollment.كود_المجموعة,
+          الشهر: monthStr,
+          المبلغ_المطلوب: String(fee),
+          المبلغ_المسدد: String(paidSoFar),
+          المتبقي: String(rem),
+          الحالة: rem === 0 ? "مسدد" : paidSoFar > 0 ? "مسدد جزئياً" : "غير مسدد",
+          تاريخ_التحديث: new Date().toISOString().slice(0, 10)
+        });
+      }
+    }
+
+    function markStudentAbsentByLessonCode(rawCode) {
+      if (!activeLectureId) {
+        showToast("يرجى الضغط على (بدء الحصة وتسجيل الكل حاضر) أولاً!", "warning");
+        return;
+      }
+      const code = String(rawCode || "").trim().toUpperCase();
+      if (!code) return;
+
+      const rec = (db.الحضور_والغياب || []).find(
+        a => a.كود_المحاضرة === activeLectureId && String(a.كود_الدرس).toUpperCase() === code
+      );
+      if (!rec) {
+        playBeep(250, 200);
+        showToast(`كود الدرس (${code}) غير مسجل في هذه المجموعة!`, "error");
+        return;
+      }
+
+      rec.الحالة = "غائب";
+      saveDatabaseToStorage(true);
+      renderLectureAttendanceTable();
+      renderAllViews();
+      playBeep(520, 140);
+      document.getElementById("attAbsentLessonInput").value = "";
+      const info = resolveLessonByCode(code);
+      showToast(`تم تسجيل غياب الطالب: ${info ? info.student.اسم_الطالب : code}`, "warning");
+    }
+
+    function renderLectureAttendanceTable() {
+      const tbody = document.getElementById("lectureAttendanceTableBody");
+      const label = document.getElementById("activeLectureLabel");
+      if (!tbody) return;
+      tbody.innerHTML = "";
+
+      if (!activeLectureId) {
+        label.textContent = "لم يتم بدء حصة بعد — اختر المجموعة واضغط بدء الحصة";
+        return;
+      }
+
+      const records = (db.الحضور_والغياب || []).filter(a => a.كود_المحاضرة === activeLectureId);
+      const presentCount = records.filter(r => r.الحالة === "حاضر").length;
+      const absentCount = records.filter(r => r.الحالة === "غائب").length;
+      label.textContent = `الحصة النشطة (${activeLectureId}) — حاضر: ${presentCount} | غائب: ${absentCount}`;
+
+      records.forEach(rec => {
+        const info = resolveLessonByCode(rec.كود_الدرس);
+        const studentName = info && info.student ? info.student.اسم_الطالب : rec.كود_الطالب;
+        const guardianPhone = info && info.student ? (info.student.هاتف_ولي_الأمر || info.student.هاتف_الطالب) : "";
+        const isPresent = rec.الحالة === "حاضر";
+
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td class="p-2 font-mono font-extrabold text-blue-400">${rec.كود_الدرس}</td>
+          <td class="p-2 font-bold text-white">${studentName}</td>
+          <td class="p-2">
+            <span class="px-2.5 py-0.5 rounded-full text-[11px] font-extrabold ${isPresent ? "bg-emerald-900/70 text-emerald-300" : "bg-rose-900/80 text-rose-300"}">
+              ${rec.الحالة}
+            </span>
+          </td>
+          <td class="p-2 flex flex-wrap gap-1.5">
+            <button type="button" data-toggle-att="${rec.كود_السجل}"
+              class="px-2.5 py-1 rounded-lg text-[11px] font-bold ${isPresent ? "bg-rose-700 text-white" : "bg-emerald-700 text-white"}">
+              ${isPresent ? "تحويل لغائب" : "تحويل لحاضر"}
+            </button>
+            ${!isPresent ? `
+              <button type="button" data-wa-absent="${rec.كود_الدرس}" data-wa-date="${rec.التاريخ}" data-wa-phone="${guardianPhone}"
+                class="px-2.5 py-1 rounded-lg bg-green-700 text-white text-[11px] font-bold">
+                واتساب غياب
+              </button>
+            ` : ""}
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      tbody.querySelectorAll("[data-toggle-att]").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const id = btn.getAttribute("data-toggle-att");
+          const row = (db.الحضور_والغياب || []).find(a => a.كود_السجل === id);
+          if (row) {
+            row.الحالة = row.الحالة === "حاضر" ? "غائب" : "حاضر";
+            saveDatabaseToStorage(true);
+            renderLectureAttendanceTable();
+            renderAllViews();
+          }
+        });
+      });
+
+      tbody.querySelectorAll("[data-wa-absent]").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const lCode = btn.getAttribute("data-wa-absent");
+          const dt = btn.getAttribute("data-wa-date");
+          let ph = String(btn.getAttribute("data-wa-phone") || "").replace(/\D+/g, "");
+          if (ph.startsWith("01")) ph = "2" + ph;
+          const info = resolveLessonByCode(lCode);
+          if (!info) return;
+          const msg =
+            `*سنتر العباقرة التعليمي* ⚠️\n` +
+            `إشعار غياب طالب عن الحصة\n` +
+            `------------------------\n` +
+            `👤 الطالب: *${info.student.اسم_الطالب}*\n` +
+            `🔖 كود الدرس: *${info.lessonCode}*\n` +
+            `📘 المادة: *${info.subject.اسم_المادة}* (${info.teacher.اسم_المدرس})\n` +
+            `📅 تاريخ الحصة: *${dt}*\n` +
+            `يرجى المتابعة مع إدارة السنتر.`;
+          window.open(`https://wa.me/${ph}?text=${encodeURIComponent(msg)}`, "_blank");
+        });
+      });
+    }
+
+    function initCascadingEnrollmentSelectors() {
+      const gradeSel = document.getElementById("enrollGradeSelect");
+      const subjectSel = document.getElementById("enrollSubjectSelect");
+      const teacherSel = document.getElementById("enrollTeacherSelect");
+      const groupSel = document.getElementById("enrollGroupSelect");
+      const feeInput = document.getElementById("enrollFeeInput");
+
+      if (!gradeSel) return;
+
+      gradeSel.innerHTML = (db.الصفوف_الدراسية || [])
+        .map(g => `<option value="${g.كود_الصف}">${g.اسم_الصف}</option>`)
+        .join("");
+
+      function updateSubjects() {
+        const selectedGrade = gradeSel.value;
+        const groupsInGrade = (db.المجموعات || []).filter(g => g.كود_الصف === selectedGrade);
+        const subjectIds = Array.from(new Set(groupsInGrade.map(g => g.كود_المادة)));
+        const subjectsList = subjectIds.length > 0
+          ? (db.المواد_الدراسية || []).filter(s => subjectIds.includes(s.كود_المادة))
+          : (db.المواد_الدراسية || []);
+
+        subjectSel.innerHTML = subjectsList
+          .map(s => `<option value="${s.كود_المادة}">${s.اسم_المادة}</option>`)
+          .join("");
+        updateTeachers();
+      }
+
+      function updateTeachers() {
+        const selectedSubject = subjectSel.value;
+        const teachersList = (db.المدرسون || []).filter(t => t.كود_المادة === selectedSubject);
+        teacherSel.innerHTML = (teachersList.length ? teachersList : (db.المدرسون || []))
+          .map(t => `<option value="${t.كود_المدرس}">${t.اسم_المدرس}</option>`)
+          .join("");
+        updateGroups();
+      }
+
+      function updateGroups() {
+        const selectedGrade = gradeSel.value;
+        const selectedSubject = subjectSel.value;
+        const selectedTeacher = teacherSel.value;
+        let matchingGroups = (db.المجموعات || []).filter(
+          g => g.كود_الصف === selectedGrade && g.كود_المادة === selectedSubject && g.كود_المدرس === selectedTeacher
+        );
+        if (matchingGroups.length === 0) {
+          matchingGroups = (db.المجموعات || []).filter(
+            g => g.كود_المادة === selectedSubject && g.كود_المدرس === selectedTeacher
+          );
+        }
+        if (matchingGroups.length === 0) {
+          matchingGroups = db.المجموعات || [];
+        }
+        groupSel.innerHTML = matchingGroups
+          .map(g => `<option value="${g.كود_المجموعة}">${g.اسم_المجموعة} (${g.الاشتراك_الشهري} ج.م)</option>`)
+          .join("");
+        updateFeeFromGroup();
+      }
+
+      function updateFeeFromGroup() {
+        const grp = (db.المجموعات || []).find(g => g.كود_المجموعة === groupSel.value);
+        if (grp) {
+          feeInput.value = grp.الاشتراك_الشهري || 250;
+        }
+      }
+
+      gradeSel.onchange = updateSubjects;
+      subjectSel.onchange = updateTeachers;
+      teacherSel.onchange = updateGroups;
+      groupSel.onchange = updateFeeFromGroup;
+
+      updateSubjects();
+    }
+
+    function saveStudentAndLessonEnrollment() {
+      const gradeId = document.getElementById("enrollGradeSelect").value;
+      const subjectId = document.getElementById("enrollSubjectSelect").value;
+      const teacherId = document.getElementById("enrollTeacherSelect").value;
+      const groupId = document.getElementById("enrollGroupSelect").value;
+      const customFee = Number(document.getElementById("enrollFeeInput").value || 250);
+      const todayStr = new Date().toISOString().slice(0, 10);
+
+      let studentId = "";
+      let studentName = "";
+
+      if (studentEntryMode === "new") {
+        studentName = document.getElementById("stuNameInput").value.trim();
+        const stuPhone = document.getElementById("stuPhoneInput").value.trim();
+        const guardName = document.getElementById("stuGuardianNameInput").value.trim() || ("ولي أمر " + studentName);
+        const guardPhone = document.getElementById("stuGuardianPhoneInput").value.trim() || stuPhone;
+
+        if (!studentName) {
+          showToast("يرجى كتابة اسم الطالب أولاً", "warning");
+          return;
+        }
+
+        const guardianId = nextCode("P", db.أولياء_الأمور, "كود_ولي_الأمر", 1001);
+        db.أولياء_الأمور.push({
+          كود_ولي_الأمر: guardianId,
+          اسم_ولي_الأمر: guardName,
+          رقم_الواتساب: guardPhone,
+          صلة_القرابة: "ولي أمر",
+          ملاحظات: ""
+        });
+
+        studentId = nextCode("S", db.الطلاب, "كود_الطالب", 1001);
+        db.الطلاب.push({
+          كود_الطالب: studentId,
+          اسم_الطالب: studentName,
+          كود_الصف: gradeId,
+          هاتف_الطالب: stuPhone,
+          كود_ولي_الأمر: guardianId,
+          هاتف_ولي_الأمر: guardPhone,
+          تاريخ_التسجيل: todayStr,
+          الحالة: "نشط",
+          ملاحظات: ""
+        });
+      } else {
+        studentId = document.getElementById("existingStudentSelect").value;
+        const stObj = (db.الطلاب || []).find(s => s.كود_الطالب === studentId);
+        if (!stObj) {
+          showToast("يرجى اختيار الطالب من القائمة", "warning");
+          return;
+        }
+        studentName = stObj.اسم_الطالب;
+      }
+
+      const duplicateInSameGroup = (db.اشتراكات_الطلاب || []).find(
+        e => e.كود_الطالب === studentId && e.كود_المجموعة === groupId
+      );
+      if (duplicateInSameGroup) {
+        showToast(`الطالب مشترك بالفعل في هذه المجموعة بكود درس (${duplicateInSameGroup.كود_الدرس})!`, "warning");
+        return;
+      }
+
+      const lessonCode = getOrCreateLessonCode(studentId, subjectId, teacherId);
+      const enrollmentId = nextCode("EN", db.اشتراكات_الطلاب, "كود_الاشتراك", 1001);
+
+      const newEnrollment = {
+        كود_الاشتراك: enrollmentId,
+        كود_الدرس: lessonCode,
+        كود_الطالب: studentId,
+        كود_المجموعة: groupId,
+        كود_المادة: subjectId,
+        كود_المدرس: teacherId,
+        قيمة_الاشتراك: String(customFee),
+        تاريخ_الاشتراك: todayStr,
+        الحالة: "نشط"
+      };
+      db.اشتراكات_الطلاب.push(newEnrollment);
+
+      const activeMonth = ((db.الإعدادات || []).find(s => s.المفتاح === "الشهر_الحالي") || {}).القيمة || todayStr.slice(0, 7);
+      ensureMonthlyDueExists(newEnrollment, activeMonth);
+
+      recordAudit("تسجيل اشتراك درس", `الطالب: ${studentName} (${studentId}) | كود الدرس: ${lessonCode} | المجموعة: ${groupId}`);
+      saveDatabaseToStorage(true);
+
+      document.getElementById("stuNameInput").value = "";
+      document.getElementById("stuPhoneInput").value = "";
+      document.getElementById("stuGuardianNameInput").value = "";
+      document.getElementById("stuGuardianPhoneInput").value = "";
+
+      renderAllViews();
+      playBeep(1040, 130);
+      showToast(`تم تسجيل (${studentName}) بنجاح — كود الدرس للكارنيه: ${lessonCode}`);
+    }
+
+    function executeBulkImportStudents() {
+      const rawText = document.getElementById("bulkPasteTextarea").value.trim();
+      if (!rawText) {
+        showToast("يرجى لصق بيانات الطلاب أو اختيار ملف CSV أولاً", "warning");
+        return;
+      }
+
+      const lines = rawText.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+      let importedStudents = 0;
+      let importedLessons = 0;
+      const todayStr = new Date().toISOString().slice(0, 10);
+      const activeMonth = ((db.الإعدادات || []).find(s => s.المفتاح === "الشهر_الحالي") || {}).القيمة || todayStr.slice(0, 7);
+
+      lines.forEach((line, idx) => {
+        const parts = line.split(/[,\t;]/).map(p => p.trim());
+        if (idx === 0 && (parts[0].includes("اسم_الطالب") || parts[0].toLowerCase().includes("name"))) {
+          return;
+        }
+        const stuName = parts[0] || "";
+        if (!stuName) return;
+
+        const stuPhone = parts[1] || "";
+        const guardName = parts[2] || ("ولي أمر " + stuName);
+        const guardPhone = parts[3] || stuPhone;
+        const groupCode = (parts[4] || "G01").toUpperCase();
+        const groupObj = (db.المجموعات || []).find(g => String(g.كود_المجموعة).toUpperCase() === groupCode) || (db.المجموعات || [])[0];
+        if (!groupObj) return;
+
+        const fee = Number(parts[5] || groupObj.الاشتراك_الشهري || 250);
+
+        let studentObj = (db.الطلاب || []).find(s => s.اسم_الطالب.trim() === stuName);
+        if (!studentObj) {
+          const guardId = nextCode("P", db.أولياء_الأمور, "كود_ولي_الأمر", 1001);
+          db.أولياء_الأمور.push({
+            كود_ولي_الأمر: guardId,
+            اسم_ولي_الأمر: guardName,
+            رقم_الواتساب: guardPhone,
+            صلة_القرابة: "ولي أمر",
+            ملاحظات: "رفع جماعي"
+          });
+
+          const stuId = nextCode("S", db.الطلاب, "كود_الطالب", 1001);
+          studentObj = {
+            كود_الطالب: stuId,
+            اسم_الطالب: stuName,
+            كود_الصف: groupObj.كود_الصف,
+            هاتف_الطالب: stuPhone,
+            كود_ولي_الأمر: guardId,
+            هاتف_ولي_الأمر: guardPhone,
+            تاريخ_التسجيل: todayStr,
+            الحالة: "نشط",
+            ملاحظات: "رفع جماعي"
+          };
+          db.الطلاب.push(studentObj);
+          importedStudents++;
+        }
+
+        const alreadyInGroup = (db.اشتراكات_الطلاب || []).some(
+          e => e.كود_الطالب === studentObj.كود_الطالب && e.كود_المجموعة === groupObj.كود_المجموعة
+        );
+        if (!alreadyInGroup) {
+          const lCode = getOrCreateLessonCode(studentObj.كود_الطالب, groupObj.كود_المادة, groupObj.كود_المدرس);
+          const enObj = {
+            كود_الاشتراك: nextCode("EN", db.اشتراكات_الطلاب, "كود_الاشتراك", 1001),
+            كود_الدرس: lCode,
+            كود_الطالب: studentObj.كود_الطالب,
+            كود_المجموعة: groupObj.كود_المجموعة,
+            كود_المادة: groupObj.كود_المادة,
+            كود_المدرس: groupObj.كود_المدرس,
+            قيمة_الاشتراك: String(fee),
+            تاريخ_الاشتراك: todayStr,
+            الحالة: "نشط"
+          };
+          db.اشتراكات_الطلاب.push(enObj);
+          ensureMonthlyDueExists(enObj, activeMonth);
+          importedLessons++;
+        }
+      });
+
+      recordAudit("رفع جماعي للطلاب", `تم إضافة ${importedStudents} طالب جديد و ${importedLessons} اشتراك درس`);
+      saveDatabaseToStorage(true);
+      renderAllViews();
+
+      const resBox = document.getElementById("bulkImportResultBox");
+      resBox.classList.remove("hidden");
+      resBox.textContent = `تم الرفع الجماعي بنجاح: أُضيف (${importedStudents}) طالب جديد و (${importedLessons}) اشتراك درس بأكوادها التلقائية.`;
+      showToast(`تم استيراد ${importedLessons} اشتراك درس بنجاح!`);
+    }
+
+    function downloadLocalBackupFile(reasonLabel = "manual") {
+      const stamp = new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
+      const fileName = `نسخة_احتياطية_سنتر_العباقرة_${reasonLabel}_${stamp}.json`;
+      try {
+        const blob = new Blob([JSON.stringify(db, null, 2)], { type: "application/json;charset=utf-8" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+      } catch (e) {}
+      recordAudit("نسخة احتياطية", `تم تنزيل نسخة احتياطية محلية (${fileName})`);
+      showToast("تم حفظ النسخة الاحتياطية على جهازك بنجاح!");
+    }
+
+    function executeClearTransactionsOnly() {
+      const confirmText = document.getElementById("confirmClearTransInput").value.trim();
+      if (confirmText !== "مسح الحركات") {
+        showToast("يرجى كتابة عبارة (مسح الحركات) بدقة للتأكيد!", "warning");
+        return;
+      }
+
+      downloadLocalBackupFile("قبل_تفريغ_الحركات");
+
+      db.المحاضرات = [];
+      db.الحضور_والغياب = [];
+      db.الامتحانات = [];
+      db.نتائج_الامتحانات = [];
+      db.الاستحقاقات_الشهرية = [];
+      db.المدفوعات = [];
+      db.المصروفات = [];
+      db.الخزينة = [];
+      db.تسويات_المدرسين = [];
+      db.سجل_العمليات = [];
+
+      activeLectureId = null;
+      activePaySelection = null;
+      lastCompletedPayment = null;
+
+      recordAudit("تفريغ الحركات والمدفوعات", "تم تصفير جميع المدفوعات والحركات مع الإبقاء التام على الطلاب واشتراكات المواد وأكواد الدروس");
+      saveDatabaseToStorage(true);
+      document.getElementById("confirmClearTransInput").value = "";
+      renderAllViews();
+      showToast("تم تفريغ المدفوعات والحركات بنجاح مع بقاء الطلاب واشتراكاتهم وأكواد الدروس كما هي!");
+    }
+
+    function executeClearAllData() {
+      const confirmText = document.getElementById("confirmClearAllInput").value.trim();
+      if (confirmText !== "مسح شامل") {
+        showToast("يرجى كتابة عبارة (مسح شامل) بدقة للتأكيد!", "warning");
+        return;
+      }
+
+      downloadLocalBackupFile("قبل_التفريغ_الشامل");
+
+      db.أولياء_الأمور = [];
+      db.الطلاب = [];
+      db.اشتراكات_الطلاب = [];
+      db.المحاضرات = [];
+      db.الحضور_والغياب = [];
+      db.الامتحانات = [];
+      db.نتائج_الامتحانات = [];
+      db.الاستحقاقات_الشهرية = [];
+      db.المدفوعات = [];
+      db.المصروفات = [];
+      db.الخزينة = [];
+      db.تسويات_المدرسين = [];
+      db.سجل_العمليات = [];
+
+      ensureAdminAccountInMemory();
+      activeLectureId = null;
+      activePaySelection = null;
+      lastCompletedPayment = null;
+
+      recordAudit("تفريغ شامل", "تم التفريغ الشامل للبيانات مع الإبقاء على الإعدادات وحساب الأدمن mrk");
+      saveDatabaseToStorage(true);
+      document.getElementById("confirmClearAllInput").value = "";
+      renderAllViews();
+      showToast("تم التفريغ الشامل لكل البيانات بنجاح!");
+    }
+
+    function getNetTreasuryBalance() {
+      const totalIn = (db.الخزينة || []).reduce((s, r) => s + (Number(r.وارد) || 0), 0);
+      const totalOut = (db.الخزينة || []).reduce((s, r) => s + (Number(r.صادر) || 0), 0);
+      return totalIn - totalOut;
+    }
+
+    function recordAudit(actionType, details) {
+      if (!Array.isArray(db.سجل_العمليات)) db.سجل_العمليات = [];
+      db.سجل_العمليات.unshift({
+        كود_العملية: "LOG-" + Date.now(),
+        التاريخ_والوقت: new Date().toISOString().replace("T", " ").slice(0, 19),
+        اسم_المستخدم: currentSession.username,
+        الدور: currentSession.role,
+        نوع_العملية: actionType,
+        التفاصيل: details
+      });
+    }
+
+    /**
+     * رسم QR Code أو بديل SVG فوري يعمل أوفلاين 100%
+     */
+    function renderQrOrFallback(containerEl, codeText, size = 80) {
+      if (!containerEl) return;
+      containerEl.innerHTML = "";
+      if (window.QRCode) {
+        try {
+          new QRCode(containerEl, {
+            text: codeText,
+            width: size,
+            height: size,
+            colorDark: "#000000",
+            colorLight: "#ffffff",
+            correctLevel: QRCode.CorrectLevel.M
+          });
+          return;
+        } catch (e) {}
+      }
+      // بديل SVG محلي سريع في حالة عدم توفر الإنترنت لتحميل مكتبة الرسم
+      containerEl.innerHTML = `
+        <svg width="${size}" height="${size}" viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+          <rect width="80" height="80" fill="#ffffff"/>
+          <rect x="6" y="6" width="22" height="22" fill="none" stroke="#000" stroke-width="4"/>
+          <rect x="12" y="12" width="10" height="10" fill="#000"/>
+          <rect x="52" y="6" width="22" height="22" fill="none" stroke="#000" stroke-width="4"/>
+          <rect x="58" y="12" width="10" height="10" fill="#000"/>
+          <rect x="6" y="52" width="22" height="22" fill="none" stroke="#000" stroke-width="4"/>
+          <rect x="12" y="58" width="10" height="10" fill="#000"/>
+          <rect x="34" y="34" width="12" height="12" fill="#000"/>
+          <text x="40" y="74" text-anchor="middle" font-size="10" font-family="monospace" font-weight="bold" fill="#000">${codeText}</text>
+        </svg>
+      `;
+    }
+
+    function renderAllViews() {
+      updateSyncBadgeUI();
+      renderQuickLessonChips();
+      renderRecentPaymentsTable();
+      renderEnrollmentsTable();
+      renderCardsPreviewGrid();
+      renderDashboardKPIsAndArrears();
+      populateGroupDropdowns();
+      populateExistingStudentsDropdown();
+    }
+
+    function renderQuickLessonChips() {
+      const box = document.getElementById("quickLessonChipsPay");
+      if (!box) return;
+      box.innerHTML = "";
+      (db.اشتراكات_الطلاب || []).forEach(en => {
+        const info = resolveLessonByCode(en.كود_الدرس);
+        if (!info) return;
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.style.cssText = "background:#1e293b;color:#e2e8f0;padding:6px 12px;border-radius:10px;border:1px solid #334155;font-size:12px;font-weight:700;cursor:pointer;";
+        btn.textContent = `${en.كود_الدرس} — ${info.student.اسم_الطالب} (${info.subject.اسم_المادة})`;
+        btn.addEventListener("click", () => {
+          handleFastPayLookup(en.كود_الدرس);
+        });
+        box.appendChild(btn);
+      });
+    }
+
+    function renderRecentPaymentsTable() {
+      const tbody = document.getElementById("recentPaymentsTableBody");
+      if (!tbody) return;
+      tbody.innerHTML = "";
+      (db.المدفوعات || []).slice(0, 12).forEach(p => {
+        const info = resolveLessonByCode(p.كود_الدرس);
+        const studentName = info && info.student ? info.student.اسم_الطالب : p.كود_الطالب;
+        const subTeach = info ? `${info.subject.اسم_المادة || ""} / ${info.teacher.اسم_المدرس || ""}` : p.كود_المجموعة;
+        const guardianPhone = info && info.student ? (info.student.هاتف_ولي_الأمر || info.student.هاتف_الطالب) : "";
+
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td class="p-2 font-mono text-blue-300 font-bold">${p.رقم_الإيصال}</td>
+          <td class="p-2 font-mono font-extrabold text-amber-300">${p.كود_الدرس}</td>
+          <td class="p-2 font-bold text-white">${studentName}</td>
+          <td class="p-2 text-slate-300">${subTeach}</td>
+          <td class="p-2 font-bold text-emerald-300">${p.الشهر_المسدد}</td>
+          <td class="p-2 font-extrabold text-emerald-400">${p.المبلغ} ج.م</td>
+          <td class="p-2 flex gap-1">
+            <button type="button" data-row-wa="${p.رقم_الإيصال}" class="px-2 py-1 rounded bg-green-700 text-white text-[10px] font-bold">واتساب</button>
+            <button type="button" data-row-pdf="${p.رقم_الإيصال}" class="px-2 py-1 rounded bg-slate-800 text-amber-300 text-[10px] font-bold">PDF</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+
+        const payPayload = {
+          receiptNo: p.رقم_الإيصال,
+          lessonCode: p.كود_الدرس,
+          studentName,
+          guardianPhone,
+          subjectName: info && info.subject ? info.subject.اسم_المادة : "",
+          teacherName: info && info.teacher ? info.teacher.اسم_المدرس : "",
+          groupName: info && info.group ? info.group.اسم_المجموعة : "",
+          month: p.الشهر_المسدد,
+          amount: p.المبلغ,
+          date: p.تاريخ_الدفع
+        };
+
+        tr.querySelector(`[data-row-wa="${p.رقم_الإيصال}"]`).addEventListener("click", () => sendPaymentWhatsApp(payPayload));
+        tr.querySelector(`[data-row-pdf="${p.رقم_الإيصال}"]`).addEventListener("click", () => printReceiptOnDemand(payPayload));
+      });
+    }
+
+    function renderEnrollmentsTable() {
+      const tbody = document.getElementById("enrollmentsTableBody");
+      if (!tbody) return;
+      const q = (document.getElementById("searchEnrollmentsInput")?.value || "").trim().toLowerCase();
+      tbody.innerHTML = "";
+
+      (db.اشتراكات_الطلاب || []).forEach(en => {
+        const info = resolveLessonByCode(en.كود_الدرس);
+        if (!info) return;
+        const searchTarget = `${en.كود_الدرس} ${en.كود_الطالب} ${info.student.اسم_الطالب} ${info.subject.اسم_المادة} ${info.teacher.اسم_المدرس}`.toLowerCase();
+        if (q && !searchTarget.includes(q)) return;
+
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td class="p-2 font-mono font-extrabold text-amber-300 text-sm">${en.كود_الدرس}</td>
+          <td class="p-2 font-mono text-slate-400">${en.كود_الطالب}</td>
+          <td class="p-2 font-bold text-white">${info.student.اسم_الطالب || ""}</td>
+          <td class="p-2 text-slate-300">${info.subject.اسم_المادة || ""} — ${info.teacher.اسم_المدرس || ""}</td>
+          <td class="p-2 text-slate-400">${info.group.اسم_المجموعة || ""}</td>
+          <td class="p-2 font-bold text-emerald-400">${en.قيمة_الاشتراك} ج.م</td>
+          <td class="p-2 flex gap-1.5">
+            <button type="button" data-pay-now="${en.كود_الدرس}" class="px-2.5 py-1 rounded-lg bg-blue-600 text-white text-[11px] font-bold">دفع باللقط</button>
+            <button type="button" data-card-now="${en.كود_الدرس}" class="px-2.5 py-1 rounded-lg bg-slate-800 text-amber-300 text-[11px] font-bold">كارنيه QR</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+
+        tr.querySelector(`[data-pay-now="${en.كود_الدرس}"]`).addEventListener("click", () => {
+          switchTab("tabFastPay");
+          handleFastPayLookup(en.كود_الدرس);
+        });
+        tr.querySelector(`[data-card-now="${en.كود_الدرس}"]`).addEventListener("click", () => {
+          switchTab("tabCardsPrint");
+        });
+      });
+    }
+
+    function renderCardsPreviewGrid() {
+      const grid = document.getElementById("cardsPreviewGrid");
+      const filterGroup = document.getElementById("cardsFilterGroupSelect")?.value || "ALL";
+      if (!grid) return;
+      grid.innerHTML = "";
+
+      const list = (db.اشتراكات_الطلاب || []).filter(en => filterGroup === "ALL" || en.كود_المجموعة === filterGroup);
+
+      list.forEach(en => {
+        const info = resolveLessonByCode(en.كود_الدرس);
+        if (!info) return;
+
+        const card = document.createElement("div");
+        card.className = "bg-slate-900 border-2 border-blue-500/40 rounded-2xl p-3.5 flex items-center justify-between gap-3 shadow";
+        card.style.cssText = "background:#0f172a;border:2px solid #2563eb;border-radius:14px;padding:12px;display:flex;justify-content:space-between;align-items:center;gap:10px;";
+        const qrContainerId = `qr_card_${en.كود_الاشتراك}`;
+        card.innerHTML = `
+          <div class="space-y-1 flex-1">
+            <div class="text-[11px] font-extrabold text-blue-400">سنتر العباقرة التعليمي — كارنيه درس</div>
+            <div class="text-base font-extrabold text-white">${info.student.اسم_الطالب || ""}</div>
+            <div class="text-xs text-amber-300 font-bold">${info.subject.اسم_المادة || ""} | ${info.teacher.اسم_المدرس || ""}</div>
+            <div class="text-[11px] text-slate-400">${info.group.اسم_المجموعة || ""}</div>
+            <div class="pt-1 flex items-center gap-2">
+              <span class="px-2.5 py-0.5 rounded bg-blue-950 border border-blue-600 font-mono font-extrabold text-sm text-white">${en.كود_الدرس}</span>
+              <button type="button" data-single-card-print="${en.كود_الدرس}" class="text-[11px] text-amber-300 hover:underline font-bold">طباعة PDF</button>
+            </div>
+          </div>
+          <div class="bg-white p-2 rounded-xl flex flex-col items-center justify-center" style="background:#fff;padding:6px;border-radius:10px;text-align:center;">
+            <div id="${qrContainerId}" class="w-[80px] h-[80px]"></div>
+            <span class="text-[10px] font-mono font-extrabold text-slate-900 mt-1" style="color:#000;font-weight:800;font-size:11px;">${en.كود_الدرس}</span>
+          </div>
+        `;
+        grid.appendChild(card);
+
+        const qrEl = card.querySelector(`#${qrContainerId}`);
+        renderQrOrFallback(qrEl, en.كود_الدرس, 80);
+
+        card.querySelector(`[data-single-card-print="${en.كود_الدرس}"]`).addEventListener("click", () => {
+          printCardsSheetA4([en]);
+        });
+      });
+    }
+
+    function printCardsSheetA4(enrollmentsList) {
+      const printArea = document.getElementById("printArea");
+      printArea.innerHTML = `<div class="cards-grid-a4" id="printCardsContainer"></div>`;
+      const container = document.getElementById("printCardsContainer");
+
+      enrollmentsList.forEach((en, idx) => {
+        const info = resolveLessonByCode(en.كود_الدرس);
+        if (!info) return;
+        const pQrId = `print_qr_${idx}`;
+        const box = document.createElement("div");
+        box.style.cssText = "border: 2px solid #1e3a8a; border-radius: 10px; padding: 10px; display: flex; justify-content: space-between; align-items: center; page-break-inside: avoid; direction: rtl; font-family: 'Cairo', sans-serif;";
+        box.innerHTML = `
+          <div>
+            <div style="font-size: 11px; font-weight: 800; color: #1e3a8a;">سنتر العباقرة التعليمي</div>
+            <div style="font-size: 14px; font-weight: 800; margin: 2px 0;">${info.student.اسم_الطالب || ""}</div>
+            <div style="font-size: 12px; font-weight: 700;">${info.subject.اسم_المادة || ""} — ${info.teacher.اسم_المدرس || ""}</div>
+            <div style="font-size: 11px; color: #334155;">${info.group.اسم_المجموعة || ""}</div>
+            <div style="margin-top: 4px; font-size: 13px; font-weight: 800; font-family: monospace;">كود الدرس: ${en.كود_الدرس}</div>
+          </div>
+          <div style="text-align: center;">
+            <div id="${pQrId}" style="width: 78px; height: 78px;"></div>
+          </div>
+        `;
+        container.appendChild(box);
+        renderQrOrFallback(box.querySelector(`#${pQrId}`), en.كود_الدرس, 78);
+      });
+
+      setTimeout(() => {
+        window.print();
+      }, 200);
+    }
+
+    function renderDashboardKPIsAndArrears() {
+      document.getElementById("kpiStudentsCount").textContent = String((db.الطلاب || []).length);
+      document.getElementById("kpiEnrollmentsCount").textContent = `${(db.اشتراكات_الطلاب || []).length} اشتراك درس`;
+
+      const totalIn = (db.الخزينة || []).reduce((s, r) => s + (Number(r.وارد) || 0), 0);
+      const totalOut = (db.الخزينة || []).reduce((s, r) => s + (Number(r.صادر) || 0), 0);
+      const net = totalIn - totalOut;
+
+      document.getElementById("kpiTotalIncome").textContent = `${totalIn} ج.م`;
+      document.getElementById("kpiTotalExpense").textContent = `${totalOut} ج.م`;
+      document.getElementById("kpiNetBalance").textContent = `${net} ج.م`;
+
+      const unpaidList = (db.الاستحقاقات_الشهرية || []).filter(d => Number(d.المتبقي) > 0);
+      document.getElementById("kpiUnpaidDuesCount").textContent = `${unpaidList.length} استحقاق غير مسدد`;
+
+      const tbody = document.getElementById("unpaidDuesTableBody");
+      if (!tbody) return;
+      tbody.innerHTML = "";
+
+      unpaidList.forEach(d => {
+        const info = resolveLessonByCode(d.كود_الدرس);
+        if (!info) return;
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td class="p-2 font-mono font-extrabold text-amber-300">${d.كود_الدرس}</td>
+          <td class="p-2 font-bold text-white">${info.student.اسم_الطالب || ""}</td>
+          <td class="p-2 text-slate-300">${info.subject.اسم_المادة || ""} — ${info.teacher.اسم_المدرس || ""}</td>
+          <td class="p-2 font-bold text-rose-300">${d.الشهر}</td>
+          <td class="p-2 font-extrabold text-rose-400">${d.المتبقي} ج.م</td>
+          <td class="p-2">
+            <button type="button" data-arrears-pay="${d.كود_الدرس}" class="px-3 py-1 rounded-lg bg-emerald-600 text-white text-[11px] font-extrabold">
+              تحصيل الآن
+            </button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+
+        tr.querySelector(`[data-arrears-pay="${d.كود_الدرس}"]`).addEventListener("click", () => {
+          switchTab("tabFastPay");
+          handleFastPayLookup(d.كود_الدرس);
+        });
+      });
+    }
+
+    function populateGroupDropdowns() {
+      const attGroup = document.getElementById("attGroupSelect");
+      const cardsFilter = document.getElementById("cardsFilterGroupSelect");
+      const groups = db.المجموعات || [];
+
+      if (attGroup) {
+        const cur = attGroup.value;
+        attGroup.innerHTML = groups.map(g => `<option value="${g.كود_المجموعة}">${g.كود_المجموعة} — ${g.اسم_المجموعة}</option>`).join("");
+        if (cur && groups.some(g => g.كود_المجموعة === cur)) attGroup.value = cur;
+      }
+
+      if (cardsFilter) {
+        const curF = cardsFilter.value || "ALL";
+        cardsFilter.innerHTML = `<option value="ALL">كل المجموعات (${(db.اشتراكات_الطلاب || []).length} كارنيه)</option>` +
+          groups.map(g => `<option value="${g.كود_المجموعة}">${g.اسم_المجموعة}</option>`).join("");
+        cardsFilter.value = curF;
+      }
+    }
+
+    function populateExistingStudentsDropdown() {
+      const sel = document.getElementById("existingStudentSelect");
+      const searchQ = (document.getElementById("smartSearchExistingStudent")?.value || "").trim().toLowerCase();
+      if (!sel) return;
+      const filtered = (db.الطلاب || []).filter(s => {
+        const hay = `${s.كود_الطالب} ${s.اسم_الطالب} ${s.هاتف_الطالب}`.toLowerCase();
+        return !searchQ || hay.includes(searchQ);
+      });
+      sel.innerHTML = filtered.map(s => `<option value="${s.كود_الطالب}">${s.كود_الطالب} — ${s.اسم_الطالب}</option>`).join("");
+    }
+
+    function switchTab(tabId) {
+      document.querySelectorAll(".tab-panel").forEach(sec => sec.classList.add("hidden"));
+      const target = document.getElementById(tabId);
+      if (target) target.classList.remove("hidden");
+
+      document.querySelectorAll(".nav-tab").forEach(btn => {
+        if (btn.getAttribute("data-tab") === tabId) {
+          btn.style.background = "#2563eb";
+        } else {
+          btn.style.background = "#334155";
+        }
+      });
+    }
+
+    async function syncWithGoogleSheets() {
+      let gasUrl = "";
+      try {
+        gasUrl = document.getElementById("gasWebAppUrlInput").value.trim() || localStorage.getItem(GAS_URL_KEY) || "";
+      } catch (e) {}
+
+      if (!gasUrl) {
+        switchTab("tabAdminCloud");
+        showToast("النظام يحفظ أوفلاين بالكامل. لربط Google Sheets ضع رابط Web App في تبويب الربط السحابي.", "warning");
+        return;
+      }
+
+      try {
+        showToast("جاري المزامنة السحابية مع Google Sheets...", "warning");
+        const response = await fetch(gasUrl, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify({
+            action: "syncSnapshot",
+            user: currentSession.username,
+            role: currentSession.role,
+            tables: db
+          })
+        });
+        const resJson = await response.json();
+        if (resJson && resJson.status === "ok") {
+          db._pendingSyncCount = 0;
+          saveDatabaseToStorage(false);
+          showToast("تمت المزامنة السحابية مع Google Sheets بنجاح!");
+        } else {
+          showToast("رد السحابة: " + (resJson.message || "خطأ غير متوقع"), "error");
+        }
+      } catch (err) {
+        showToast("الموبايل أوفلاين حالياً — كل بياناتك محفوظة محلياً بأمان وستتم المزامنة عند توفر الإنترنت.", "warning");
+      }
+    }
+
+    function getEmbeddedGasCode() {
+      return `/**
+ * ============================================================================
+ * نظام إدارة سنتر العباقرة التعليمي — المحرك السحابي الكامل (Google Apps Script)
+ * الإصدار: المرحلة الأولى الكاملة (يعمل من script.google.com مباشرة وينشئ الشيت تلقائياً)
+ * حساب مالك النظام الافتراضي: اسم المستخدم: mrk | كلمة المرور: 1510
+ * ============================================================================
+ * طريقة التركيب السريعة من الموبايل (بدون فتح تطبيق Google Sheets):
+ * 1. افتح متصفح Chrome على موبايلك، فعّل (الموقع الإلكتروني المخصص للكمبيوتر / Desktop site)
+ * 2. ادخل على الرابط: https://script.google.com ثم اضغط (مشروع جديد / New project)
+ * 3. امسح أي كود موجود والصق هذا الكود بالكامل من أول سطر لآخر سطر ثم اضغط حفظ (Save).
+ * 4. اضغط زر (تشغيل / Run) بالأعلى لتشغيل الدالة الأولى (تشغيل_لأول_مرة_إنشاء_الشيت) ووافق على الصلاحيات،
+ *    سيقوم الكود تلقائياً بإنشاء ملف الشيت باسم "قاعدة بيانات سنتر العباقرة" وبداخله الـ 23 ورقة عمل كاملة!
+ * 5. اضغط (نشر / Deploy) -> (نشر جديد / New deployment) -> اختر النوع: (تطبيق ويب / Web app)
+ *    اجعل Execute as: Me (أنا) واجعل Who has access: Anyone (أي شخص) ثم اضغط Deploy.
+ * 6. انسخ رابط الـ Web App وضعه في تبويب (7. الربط السحابي) داخل تطبيق الموبايل.
+ * ============================================================================
+ */
+
+const SYSTEM_VERSION = "1.1.0-Phase1-Standalone";
+const DATABASE_FILE_NAME = "قاعدة بيانات سنتر العباقرة";
+const BACKUP_FOLDER_NAME = "نسخ_احتياطية_سنتر_العباقرة";
+const PROP_SHEET_ID_KEY = "ABAKERA_SHEET_ID";
+
+/**
+ * الدالة الأولى في الملف (تظهر افتراضياً عند الضغط على زر Run / تشغيل في المحرر)
+ * تقوم بإنشاء ملف الشيت وتوليد الـ 23 ورقة عمل وحساب الأدمن mrk / 1510 فوراً
+ */
+function تشغيل_لأول_مرة_إنشاء_الشيت() {
+  const ss = initializeDatabaseIfNeeded();
+  Logger.log("تم إنشاء وتجهيز قاعدة بيانات سنتر العباقرة (23 ورقة عمل) بنجاح!");
+  Logger.log("رابط الشيت على جوجل درايف: " + ss.getUrl());
+  return ss.getUrl();
+}
+
+/**
+ * تعريف الـ 23 ورقة عمل وأعمدتها المعتمدة
+ */
+const SCHEMA = {
+  "الإعدادات": ["المفتاح", "القيمة", "الوصف", "آخر_تحديث"],
+  "الأعوام_الدراسية": ["كود_العام", "اسم_العام", "تاريخ_البداية", "تاريخ_النهاية", "نشط"],
+  "الفصول_الدراسية": ["كود_الفصل", "كود_العام", "اسم_الفصل", "نشط"],
+  "الفروع": ["كود_الفرع", "اسم_الفرع", "العنوان", "الهاتف", "نشط"],
+  "القاعات": ["كود_القاعة", "كود_الفرع", "اسم_القاعة", "السعة", "نشط"],
+  "المواد_الدراسية": ["كود_المادة", "اسم_المادة", "الاختصار", "نشط"],
+  "الصفوف_الدراسية": ["كود_الصف", "اسم_الصف", "المرحلة", "نشط"],
+  "أولياء_الأمور": ["كود_ولي_الأمر", "اسم_ولي_الأمر", "رقم_الواتساب", "صلة_القرابة", "ملاحظات"],
+  "المدرسون": ["كود_المدرس", "اسم_المدرس", "كود_المادة", "رقم_الهاتف", "نسبة_المدرس", "نشط"],
+  "الطلاب": ["كود_الطالب", "اسم_الطالب", "كود_الصف", "هاتف_الطالب", "كود_ولي_الأمر", "هاتف_ولي_الأمر", "تاريخ_التسجيل", "الحالة", "ملاحظات"],
+  "المجموعات": ["كود_المجموعة", "اسم_المجموعة", "كود_الصف", "كود_المادة", "كود_المدرس", "كود_القاعة", "الأيام", "الموعد", "الاشتراك_الشهري", "نشط"],
+  "اشتراكات_الطلاب": ["كود_الاشتراك", "كود_الدرس", "كود_الطالب", "كود_المجموعة", "كود_المادة", "كود_المدرس", "قيمة_الاشتراك", "تاريخ_الاشتراك", "الحالة"],
+  "المحاضرات": ["كود_المحاضرة", "كود_المجموعة", "التاريخ", "الشهر", "عنوان_الحصة", "مسجل_بواسطة"],
+  "الحضور_والغياب": ["كود_السجل", "كود_المحاضرة", "كود_المجموعة", "كود_الدرس", "كود_الطالب", "التاريخ", "الشهر", "الحالة", "وقت_التسجيل"],
+  "الامتحانات": ["كود_الامتحان", "كود_المجموعة", "كود_المادة", "كود_المدرس", "اسم_الامتحان", "التاريخ", "الدرجة_النهائية", "درجة_النجاح"],
+  "نتائج_الامتحانات": ["كود_النتيجة", "كود_الامتحان", "كود_الدرس", "كود_الطالب", "الدرجة", "التقدير", "ملاحظات"],
+  "الاستحقاقات_الشهرية": ["كود_الاستحقاق", "كود_الدرس", "كود_الطالب", "كود_المجموعة", "الشهر", "المبلغ_المطلوب", "المبلغ_المسدد", "المتبقي", "الحالة", "تاريخ_التحديث"],
+  "المدفوعات": ["رقم_الإيصال", "كود_الدرس", "كود_الطالب", "كود_المجموعة", "الشهر_المسدد", "المبلغ", "تاريخ_الدفع", "طريقة_الدفع", "المستلم", "ملاحظات"],
+  "المصروفات": ["كود_المصروف", "الفئة", "البيان", "المبلغ", "التاريخ", "الشهر", "الصارف", "ملاحظات"],
+  "الخزينة": ["كود_الحركة", "نوع_الحركة", "المرجع", "البيان", "وارد", "صادر", "الرصيد_اللحظي", "التاريخ", "المستخدم"],
+  "تسويات_المدرسين": ["كود_التسوية", "كود_المدرس", "الشهر", "إجمالي_التحصيل", "نسبة_المدرس", "مستحق_المدرس", "نصيب_السنتر", "تاريخ_التسوية", "الحالة"],
+  "المستخدمون": ["كود_المستخدم", "اسم_المستخدم", "كلمة_المرور", "الاسم_الكامل", "الدور", "نشط"],
+  "سجل_العمليات": ["كود_العملية", "التاريخ_والوقت", "اسم_المستخدم", "الدور", "نوع_العملية", "التفاصيل"]
+};
+
+const TRANSACTION_TABLES = [
+  "المحاضرات",
+  "الحضور_والغياب",
+  "الامتحانات",
+  "نتائج_الامتحانات",
+  "الاستحقاقات_الشهرية",
+  "المدفوعات",
+  "المصروفات",
+  "الخزينة",
+  "تسويات_المدرسين",
+  "سجل_العمليات"
+];
+
+const FULL_RESET_TABLES = [
+  "أولياء_الأمور",
+  "المدرسون",
+  "الطلاب",
+  "المجموعات",
+  "اشتراكات_الطلاب",
+  "المحاضرات",
+  "الحضور_والغياب",
+  "الامتحانات",
+  "نتائج_الامتحانات",
+  "الاستحقاقات_الشهرية",
+  "المدفوعات",
+  "المصروفات",
+  "الخزينة",
+  "تسويات_المدرسين",
+  "سجل_العمليات"
+];
+
+/**
+ * دالة ذكية للوصول إلى ملف الشيت أو إنشائه تلقائياً على Google Drive
+ * تعمل سواء فُتح الكود من script.google.com مباشرة أو من داخل شيت
+ */
+function getTargetSpreadsheet() {
+  // 1. إذا كان الكود مربوطاً بشيت مفتوح بالفعل
+  try {
+    const active = SpreadsheetApp.getActiveSpreadsheet();
+    if (active) return active;
+  } catch (e) {}
+
+  const props = PropertiesService.getScriptProperties();
+  const savedId = props.getProperty(PROP_SHEET_ID_KEY);
+
+  // 2. إذا كان الشيت قد أُنشئ سابقاً ومحفوظ رقم المعرف الخاص به
+  if (savedId) {
+    try {
+      const existingById = SpreadsheetApp.openById(savedId);
+      if (existingById) return existingById;
+    } catch (e) {}
+  }
+
+  // 3. البحث في Google Drive عن شيت بنفس الاسم قبل إنشاء شيت جديد
+  try {
+    const files = DriveApp.getFilesByName(DATABASE_FILE_NAME);
+    if (files.hasNext()) {
+      const file = files.next();
+      const foundSS = SpreadsheetApp.openById(file.getId());
+      props.setProperty(PROP_SHEET_ID_KEY, foundSS.getId());
+      return foundSS;
+    }
+  } catch (e) {}
+
+  // 4. إنشاء ملف Google Sheet جديد تلقائياً على حساب المستخدم
+  const createdSS = SpreadsheetApp.create(DATABASE_FILE_NAME);
+  props.setProperty(PROP_SHEET_ID_KEY, createdSS.getId());
+  return createdSS;
+}
+
+/**
+ * استقبال طلبات GET
+ */
+function doGet(e) {
+  try {
+    const ss = initializeDatabaseIfNeeded();
+    const action = (e && e.parameter && e.parameter.action) ? e.parameter.action : "ping";
+    if (action === "ping") {
+      return jsonResponse({
+        status: "ok",
+        version: SYSTEM_VERSION,
+        center: "سنتر العباقرة التعليمي",
+        sheetUrl: ss.getUrl(),
+        sheetsCount: Object.keys(SCHEMA).length
+      });
+    }
+    if (action === "pullAll") {
+      return jsonResponse({
+        status: "ok",
+        sheetUrl: ss.getUrl(),
+        data: readAllTables(ss)
+      });
+    }
+    return jsonResponse({
+      status: "ok",
+      message: "تم إنشاء وتجهيز الشيت (23 ورقة عمل) بنجاح",
+      sheetUrl: ss.getUrl()
+    });
+  } catch (err) {
+    return jsonResponse({ status: "error", message: err.toString() });
+  }
+}
+
+/**
+ * استقبال طلبات POST (المزامنة، النسخ الاحتياطي، التفريغ، التهيئة)
+ */
+function doPost(e) {
+  const lock = LockService.getScriptLock();
+  lock.waitLock(25000);
+  try {
+    const ss = initializeDatabaseIfNeeded();
+    const body = e && e.postData && e.postData.contents ? JSON.parse(e.postData.contents) : {};
+    const action = body.action || "";
+
+    if (action === "initDatabase") {
+      return jsonResponse({
+        status: "ok",
+        message: "تم تهيئة جميع الـ 23 ورقة عمل بنجاح",
+        sheetUrl: ss.getUrl(),
+        data: readAllTables(ss)
+      });
+    }
+
+    if (action === "syncSnapshot") {
+      if (body.tables) {
+        writeSnapshotTables(ss, body.tables);
+      }
+      logAction(ss, body.user || "mrk", body.role || "مالك النظام", "مزامنة سحابية", "تمت مزامنة البيانات مع Google Sheets");
+      return jsonResponse({
+        status: "ok",
+        message: "تمت المزامنة السحابية بنجاح مع الـ 23 ورقة عمل",
+        sheetUrl: ss.getUrl(),
+        data: readAllTables(ss)
+      });
+    }
+
+    if (action === "createBackup") {
+      const backupInfo = createDriveBackup(ss, body.reason || "نسخة احتياطية يدوية");
+      logAction(ss, body.user || "mrk", body.role || "مالك النظام", "نسخ احتياطي", "تم إنشاء نسخة احتياطية: " + backupInfo.name);
+      return jsonResponse({
+        status: "ok",
+        message: "تم إنشاء النسخة الاحتياطية على Google Drive بنجاح",
+        sheetUrl: ss.getUrl(),
+        backup: backupInfo
+      });
+    }
+
+    if (action === "clearTransactions") {
+      const backupInfo = createDriveBackup(ss, "قبل_تفريغ_الحركات");
+      clearSpecificTables(ss, TRANSACTION_TABLES);
+      if (body.tables) {
+        writeSnapshotTables(ss, body.tables);
+      }
+      logAction(ss, body.user || "mrk", body.role || "مالك النظام", "تفريغ الحركات", "تم تفريغ الحركات والمدفوعات مع الإبقاء على الطلاب وأكواد الدروس");
+      return jsonResponse({
+        status: "ok",
+        message: "تم تفريغ الحركات والمدفوعات مع حفظ نسخة احتياطية وبقاء الطلاب وأكواد الدروس",
+        sheetUrl: ss.getUrl(),
+        backup: backupInfo,
+        data: readAllTables(ss)
+      });
+    }
+
+    if (action === "clearAll") {
+      const backupInfo = createDriveBackup(ss, "قبل_التفريغ_الشامل");
+      clearSpecificTables(ss, FULL_RESET_TABLES);
+      ensureAdminUser(ss);
+      if (body.tables) {
+        writeSnapshotTables(ss, body.tables);
+      }
+      logAction(ss, body.user || "mrk", body.role || "مالك النظام", "تفريغ شامل", "تم التفريغ الشامل للبيانات مع حفظ نسخة احتياطية");
+      return jsonResponse({
+        status: "ok",
+        message: "تم التفريغ الشامل للبيانات مع حفظ نسخة احتياطية",
+        sheetUrl: ss.getUrl(),
+        backup: backupInfo,
+        data: readAllTables(ss)
+      });
+    }
+
+    return jsonResponse({ status: "error", message: "أمر غير معروف: " + action });
+  } catch (err) {
+    return jsonResponse({ status: "error", message: err.toString() });
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+/**
+ * إنشاء وتهيئة كل الـ 23 ورقة عمل تلقائياً وحذف الورقة الفارغة الافتراضية
+ */
+function initializeDatabaseIfNeeded() {
+  const ss = getTargetSpreadsheet();
+  const sheetNames = Object.keys(SCHEMA);
+
+  sheetNames.forEach(function(name) {
+    let sh = ss.getSheetByName(name);
+    const headers = SCHEMA[name];
+    if (!sh) {
+      sh = ss.insertSheet(name);
+      sh.setRightToLeft(true);
+      sh.getRange(1, 1, 1, headers.length).setValues([headers]);
+      sh.getRange(1, 1, 1, headers.length)
+        .setFontWeight("bold")
+        .setBackground("#1e3a8a")
+        .setFontColor("#ffffff");
+      sh.setFrozenRows(1);
+    } else if (sh.getLastRow() === 0) {
+      sh.setRightToLeft(true);
+      sh.getRange(1, 1, 1, headers.length).setValues([headers]);
+      sh.setFrozenRows(1);
+    }
+  });
+
+  // حذف الورقة الافتراضية الفارغة (Sheet1 أو الورقة1) إن وجدت بعد إنشاء الـ 23 ورقة
+  ["Sheet1", "الورقة1", "ورقة1"].forEach(function(defaultName) {
+    const defSheet = ss.getSheetByName(defaultName);
+    if (defSheet && ss.getSheets().length > 1) {
+      try { ss.deleteSheet(defSheet); } catch (e) {}
+    }
+  });
+
+  ensureAdminUser(ss);
+  return ss;
+}
+
+/**
+ * ضمان وجود حساب مالك النظام mrk / 1510 دائماً
+ */
+function ensureAdminUser(ss) {
+  const sh = ss.getSheetByName("المستخدمون");
+  if (!sh) return;
+  const lastRow = sh.getLastRow();
+  if (lastRow <= 1) {
+    sh.appendRow(["U001", "mrk", "1510", "محمد السعيد (مالك النظام)", "مالك النظام", "نعم"]);
+    return;
+  }
+  const data = sh.getRange(2, 1, lastRow - 1, 6).getValues();
+  let found = false;
+  for (let i = 0; i < data.length; i++) {
+    if (String(data[i][1]).trim().toLowerCase() === "mrk") {
+      found = true;
+      break;
+    }
+  }
+  if (!found) {
+    sh.appendRow(["U001", "mrk", "1510", "محمد السعيد (مالك النظام)", "مالك النظام", "نعم"]);
+  }
+}
+
+/**
+ * قراءة كل الجداول
+ */
+function readAllTables(ss) {
+  const result = {};
+  Object.keys(SCHEMA).forEach(function(tableName) {
+    const sh = ss.getSheetByName(tableName);
+    if (!sh || sh.getLastRow() <= 1) {
+      result[tableName] = [];
+      return;
+    }
+    const headers = SCHEMA[tableName];
+    const rows = sh.getRange(2, 1, sh.getLastRow() - 1, headers.length).getDisplayValues();
+    result[tableName] = rows.map(function(r) {
+      const obj = {};
+      headers.forEach(function(h, idx) {
+        obj[h] = r[idx];
+      });
+      return obj;
+    });
+  });
+  return result;
+}
+
+/**
+ * كتابة الجداول دفعة واحدة (Batch Write)
+ */
+function writeSnapshotTables(ss, tablesObj) {
+  Object.keys(tablesObj).forEach(function(tableName) {
+    if (!SCHEMA[tableName]) return;
+    const sh = ss.getSheetByName(tableName);
+    if (!sh) return;
+    const headers = SCHEMA[tableName];
+    const rowsData = tablesObj[tableName] || [];
+
+    if (sh.getLastRow() > 1) {
+      sh.getRange(2, 1, sh.getLastRow() - 1, headers.length).clearContent();
+    }
+
+    if (rowsData.length > 0) {
+      const matrix = rowsData.map(function(item) {
+        return headers.map(function(h) {
+          return item[h] !== undefined && item[h] !== null ? item[h] : "";
+        });
+      });
+      sh.getRange(2, 1, matrix.length, headers.length).setValues(matrix);
+    }
+  });
+  ensureAdminUser(ss);
+}
+
+/**
+ * مسح محتوى قائمة محددة من الجداول
+ */
+function clearSpecificTables(ss, tableList) {
+  tableList.forEach(function(tableName) {
+    const sh = ss.getSheetByName(tableName);
+    if (sh && sh.getLastRow() > 1) {
+      sh.getRange(2, 1, sh.getLastRow() - 1, sh.getLastColumn()).clearContent();
+    }
+  });
+}
+
+/**
+ * إنشاء نسخة احتياطية كاملة على Google Drive
+ */
+function createDriveBackup(ss, reason) {
+  const folders = DriveApp.getFoldersByName(BACKUP_FOLDER_NAME);
+  const folder = folders.hasNext() ? folders.next() : DriveApp.createFolder(BACKUP_FOLDER_NAME);
+  const timestamp = Utilities.formatDate(new Date(), "Africa/Cairo", "yyyy-MM-dd_HH-mm-ss");
+  const backupName = "نسخة_سنتر_العباقرة_" + reason + "_" + timestamp;
+  const file = DriveApp.getFileById(ss.getId()).makeCopy(backupName, folder);
+  return {
+    name: backupName,
+    id: file.getId(),
+    url: file.getUrl(),
+    timestamp: timestamp
+  };
+}
+
+/**
+ * تسجيل حركة في سجل العمليات
+ */
+function logAction(ss, user, role, type, details) {
+  const sh = ss.getSheetByName("سجل_العمليات");
+  if (!sh) return;
+  const nowStr = Utilities.formatDate(new Date(), "Africa/Cairo", "yyyy-MM-dd HH:mm:ss");
+  const id = "LOG-" + new Date().getTime();
+  sh.appendRow([id, nowStr, user, role, type, details]);
+}
+
+function jsonResponse(obj) {
+  return ContentService
+    .createTextOutput(JSON.stringify(obj))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+`;
+    }
+
+    window.addEventListener("DOMContentLoaded", () => {
+      loadDatabaseFromStorage();
+
+      const todayIso = new Date().toISOString().slice(0, 10);
+      document.getElementById("attDateInput").value = todayIso;
+      document.getElementById("billingMonthInput").value = todayIso.slice(0, 7);
+
+      document.getElementById("btnQuickFillAdmin").addEventListener("click", () => {
+        document.getElementById("loginUsername").value = "mrk";
+        document.getElementById("loginPassword").value = "1510";
+      });
+
+      document.getElementById("btnDoLogin").addEventListener("click", () => {
+        const u = document.getElementById("loginUsername").value.trim();
+        const p = document.getElementById("loginPassword").value.trim();
+        const errBox = document.getElementById("loginErrorBox");
+
+        const matchedUser = (db.المستخدمون || []).find(
+          row => String(row.اسم_المستخدم).trim().toLowerCase() === u.toLowerCase() &&
+                 String(row.كلمة_المرور).trim() === p &&
+                 String(row.نشط).trim() !== "لا"
+        );
+
+        if (!matchedUser) {
+          errBox.textContent = "بيانات الدخول غير صحيحة! (للدخول كأدمن استخدم: mrk وكلمة المرور: 1510)";
+          errBox.classList.remove("hidden");
+          playBeep(240, 200);
+          return;
+        }
+
+        const cleanRole = String(matchedUser.الدور || "").trim();
+        const validRoles = ["مالك النظام", "مدير", "سكرتير", "محاسب", "مدرس"];
+        const safeRole = validRoles.includes(cleanRole) ? cleanRole : "سكرتير";
+
+        currentSession = {
+          loggedIn: true,
+          userId: matchedUser.كود_المستخدم,
+          username: String(matchedUser.اسم_المستخدم).trim(),
+          fullName: matchedUser.الاسم_الكامل,
+          role: safeRole
+        };
+
+        errBox.classList.add("hidden");
+        document.getElementById("loginScreen").classList.add("hidden");
+        document.getElementById("appShell").classList.remove("hidden");
+        document.getElementById("activeUserLabel").textContent = currentSession.username;
+        document.getElementById("activeRoleLabel").textContent = currentSession.role;
+
+        initCascadingEnrollmentSelectors();
+        renderAllViews();
+        playBeep(1020, 110);
+        showToast(`مرحباً بك يا ${currentSession.fullName}`);
+      });
+
+      document.getElementById("btnHeaderLogout").addEventListener("click", () => {
+        currentSession.loggedIn = false;
+        document.getElementById("appShell").classList.add("hidden");
+        document.getElementById("loginScreen").classList.remove("hidden");
+      });
+
+      document.querySelectorAll(".nav-tab").forEach(btn => {
+        btn.addEventListener("click", () => {
+          switchTab(btn.getAttribute("data-tab"));
+        });
+      });
+
+      document.getElementById("btnLookupLessonPay").addEventListener("click", () => {
+        handleFastPayLookup(document.getElementById("fastPayLessonInput").value);
+      });
+      document.getElementById("fastPayLessonInput").addEventListener("keydown", e => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          handleFastPayLookup(e.target.value);
+        }
+      });
+      document.getElementById("btnConfirmFastPayment").addEventListener("click", confirmAndRecordFastPayment);
+      document.getElementById("btnCancelFastPayment").addEventListener("click", () => {
+        document.getElementById("fastPayConfirmCard").classList.add("hidden");
+      });
+      document.getElementById("btnSendPayWhatsApp").addEventListener("click", () => sendPaymentWhatsApp(lastCompletedPayment));
+      document.getElementById("btnPrintReceiptPdf").addEventListener("click", () => printReceiptOnDemand(lastCompletedPayment));
+      document.getElementById("btnNextStudentScan").addEventListener("click", () => {
+        document.getElementById("postPaymentCard").classList.add("hidden");
+        const inp = document.getElementById("fastPayLessonInput");
+        inp.value = "";
+        inp.focus();
+      });
+
+      document.getElementById("btnTogglePayCamera").addEventListener("click", () => {
+        const wrap = document.getElementById("payCameraWrapper");
+        wrap.classList.remove("hidden");
+        if (window.Html5Qrcode) {
+          if (payHtml5QrCode) {
+            try { payHtml5QrCode.stop(); } catch (e) {}
+          }
+          payHtml5QrCode = new Html5Qrcode("payQrReader");
+          payHtml5QrCode.start(
+            { facingMode: "environment" },
+            { fps: 12, qrbox: { width: 220, height: 220 } },
+            decodedText => {
+              handleFastPayLookup(decodedText);
+              try { payHtml5QrCode.stop(); } catch (e) {}
+              wrap.classList.add("hidden");
+            },
+            () => {}
+          ).catch(() => {
+            showToast("تعذر فتح الكاميرا داخل المعاينة — يمكنك الضغط على أكواد الدروس الجاهزة بالأسفل أو فتح الرابط من متصفح الموبايل.", "warning");
+          });
+        }
+      });
+
+      document.getElementById("btnClosePayCamera").addEventListener("click", () => {
+        if (payHtml5QrCode) {
+          try { payHtml5QrCode.stop(); } catch (e) {}
+        }
+        document.getElementById("payCameraWrapper").classList.add("hidden");
+      });
+
+      document.getElementById("btnStartGroupAttendance").addEventListener("click", startGroupLectureAttendance);
+      document.getElementById("btnMarkAbsentCode").addEventListener("click", () => {
+        markStudentAbsentByLessonCode(document.getElementById("attAbsentLessonInput").value);
+      });
+      document.getElementById("attAbsentLessonInput").addEventListener("keydown", e => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          markStudentAbsentByLessonCode(e.target.value);
+        }
+      });
+
+      document.getElementById("btnToggleAttCamera").addEventListener("click", () => {
+        const wrap = document.getElementById("attCameraWrapper");
+        wrap.classList.remove("hidden");
+        if (window.Html5Qrcode) {
+          if (attHtml5QrCode) {
+            try { attHtml5QrCode.stop(); } catch (e) {}
+          }
+          attHtml5QrCode = new Html5Qrcode("attQrReader");
+          attHtml5QrCode.start(
+            { facingMode: "environment" },
+            { fps: 12, qrbox: { width: 220, height: 220 } },
+            decodedText => {
+              markStudentAbsentByLessonCode(decodedText);
+            },
+            () => {}
+          ).catch(() => {
+            showToast("تعذر فتح الكاميرا داخل المعاينة — استخدم الإدخال السريع أو افتح الرابط عبر HTTPS.", "warning");
+          });
+        }
+      });
+
+      document.getElementById("btnCloseAttCamera").addEventListener("click", () => {
+        if (attHtml5QrCode) {
+          try { attHtml5QrCode.stop(); } catch (e) {}
+        }
+        document.getElementById("attCameraWrapper").classList.add("hidden");
+      });
+
+      document.getElementById("btnModeNewStudent").addEventListener("click", () => {
+        studentEntryMode = "new";
+        document.getElementById("newStudentFieldsBox").classList.remove("hidden");
+        document.getElementById("existingStudentPickerBox").classList.add("hidden");
+        document.getElementById("btnModeNewStudent").style.background = "#2563eb";
+        document.getElementById("btnModeExistingStudent").style.background = "#1e293b";
+      });
+
+      document.getElementById("btnModeExistingStudent").addEventListener("click", () => {
+        studentEntryMode = "existing";
+        document.getElementById("newStudentFieldsBox").classList.add("hidden");
+        document.getElementById("existingStudentPickerBox").classList.remove("hidden");
+        document.getElementById("btnModeExistingStudent").style.background = "#2563eb";
+        document.getElementById("btnModeNewStudent").style.background = "#1e293b";
+        populateExistingStudentsDropdown();
+      });
+
+      document.getElementById("smartSearchExistingStudent").addEventListener("input", populateExistingStudentsDropdown);
+      document.getElementById("btnSaveStudentEnrollment").addEventListener("click", saveStudentAndLessonEnrollment);
+      document.getElementById("searchEnrollmentsInput").addEventListener("input", renderEnrollmentsTable);
+
+      document.getElementById("cardsFilterGroupSelect").addEventListener("change", renderCardsPreviewGrid);
+      document.getElementById("btnPrintAllFilteredCards").addEventListener("click", () => {
+        const f = document.getElementById("cardsFilterGroupSelect").value || "ALL";
+        const list = (db.اشتراكات_الطلاب || []).filter(en => f === "ALL" || en.كود_المجموعة === f);
+        printCardsSheetA4(list);
+      });
+
+      document.getElementById("btnDownloadCsvTemplate").addEventListener("click", () => {
+        const csvContent = "\uFEFFاسم_الطالب,هاتف_الطالب,اسم_ولي_الأمر,هاتف_ولي_الأمر,كود_المجموعة,قيمة_الاشتراك\nعمر خالد سعيد,01011122233,خالد سعيد,01011122244,G01,250\nسارة محمود نبيل,01055566677,محمود نبيل,01055566688,G02,280\n";
+        const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "قالب_رفع_طلاب_سنتر_العباقرة.csv";
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+        showToast("تم تحميل قالب الرفع الجماعي (CSV) بنجاح");
+      });
+
+      document.getElementById("bulkCsvFileInput").addEventListener("change", e => {
+        const file = e.target.files && e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = ev => {
+          document.getElementById("bulkPasteTextarea").value = String(ev.target.result || "");
+          showToast("تم قراءة ملف CSV بنجاح — اضغط الآن على تنفيذ الرفع الجماعي");
+        };
+        reader.readAsText(file, "UTF-8");
+      });
+
+      document.getElementById("btnFillSampleBulkRows").addEventListener("click", () => {
+        document.getElementById("bulkPasteTextarea").value =
+          "عمر خالد سعيد,01011122233,خالد سعيد,01011122244,G01,250\n" +
+          "سارة محمود نبيل,01055566677,محمود نبيل,01055566688,G02,280\n" +
+          "كريم طارق فؤاد,01099988877,طارق فؤاد,01099988866,G03,200";
+      });
+
+      document.getElementById("btnExecuteBulkImport").addEventListener("click", executeBulkImportStudents);
+
+      document.getElementById("btnAddExpense").addEventListener("click", () => {
+        const cat = document.getElementById("expCategoryInput").value;
+        const amt = Number(document.getElementById("expAmountInput").value);
+        const desc = document.getElementById("expDescInput").value.trim() || cat;
+        if (isNaN(amt) || amt <= 0) {
+          showToast("يرجى إدخال مبلغ المصروف بشكل صحيح", "warning");
+          return;
+        }
+        const todayStr = new Date().toISOString().slice(0, 10);
+        const expId = nextCode("EXP-", db.المصروفات, "كود_المصروف", 101);
+        db.المصروفات.push({
+          كود_المصروف: expId,
+          الفئة: cat,
+          البيان: desc,
+          المبلغ: String(amt),
+          التاريخ: todayStr,
+          الشهر: todayStr.slice(0, 7),
+          الصارف: currentSession.username,
+          ملاحظات: ""
+        });
+
+        const curBal = getNetTreasuryBalance();
+        db.الخزينة.push({
+          كود_الحركة: nextCode("TR-", db.الخزينة, "كود_الحركة", 1001),
+          نوع_الحركة: "مصروفات",
+          المرجع: expId,
+          البيان: `${cat} — ${desc}`,
+          وارد: "0",
+          صادر: String(amt),
+          الرصيد_اللحظي: String(curBal - amt),
+          التاريخ: todayStr,
+          المستخدم: currentSession.username
+        });
+
+        document.getElementById("expAmountInput").value = "";
+        document.getElementById("expDescInput").value = "";
+        saveDatabaseToStorage(true);
+        renderAllViews();
+        showToast(`تم تسجيل المصروف (${amt} ج.م) وخصمه من الخزينة`);
+      });
+
+      document.getElementById("btnGenerateMonthlyBilling").addEventListener("click", () => {
+        const m = document.getElementById("billingMonthInput").value;
+        const overrideAmt = Number(document.getElementById("billingOverrideAmount").value);
+        if (!m) {
+          showToast("يرجى اختيار الشهر أولاً", "warning");
+          return;
+        }
+        let count = 0;
+        (db.اشتراكات_الطلاب || []).forEach(en => {
+          if (en.الحالة !== "نشط") return;
+          const exists = (db.الاستحقاقات_الشهرية || []).some(
+            d => String(d.كود_الدرس).toUpperCase() === String(en.كود_الدرس).toUpperCase() && d.الشهر === m
+          );
+          if (!exists) {
+            const fee = (!isNaN(overrideAmt) && overrideAmt > 0) ? overrideAmt : Number(en.قيمة_الاشتراك || 250);
+            db.الاستحقاقات_الشهرية.push({
+              كود_الاستحقاق: nextCode("DUE", db.الاستحقاقات_الشهرية, "كود_الاستحقاق", 1001),
+              كود_الدرس: en.كود_الدرس,
+              كود_الطالب: en.كود_الطالب,
+              كود_المجموعة: en.كود_المجموعة,
+              الشهر: m,
+              المبلغ_المطلوب: String(fee),
+              المبلغ_المسدد: "0",
+              المتبقي: String(fee),
+              الحالة: "غير مسدد",
+              تاريخ_التحديث: new Date().toISOString().slice(0, 10)
+            });
+            count++;
+          }
+        });
+        saveDatabaseToStorage(true);
+        renderAllViews();
+        showToast(`تم توليد (${count}) استحقاق شهري جديد لشهر ${m}`);
+      });
+
+      document.getElementById("btnHeaderBackup").addEventListener("click", () => downloadLocalBackupFile("سريع"));
+      document.getElementById("btnDownloadBackupJson").addEventListener("click", () => downloadLocalBackupFile("يدوي"));
+      document.getElementById("btnHeaderSync").addEventListener("click", syncWithGoogleSheets);
+
+      document.getElementById("restoreBackupFileInput").addEventListener("change", e => {
+        const file = e.target.files && e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = ev => {
+          try {
+            const parsed = JSON.parse(String(ev.target.result || "{}"));
+            if (parsed && parsed.الطلاب && parsed.اشتراكات_الطلاب) {
+              db = parsed;
+              ensureAdminAccountInMemory();
+              saveDatabaseToStorage(false);
+              renderAllViews();
+              showToast("تمت استعادة النسخة الاحتياطية بنجاح!");
+            } else {
+              showToast("ملف النسخة الاحتياطية غير صالح!", "error");
+            }
+          } catch (err) {
+            showToast("خطأ في قراءة ملف النسخة الاحتياطية", "error");
+          }
+        };
+        reader.readAsText(file, "UTF-8");
+      });
+
+      document.getElementById("btnExecClearTransactions").addEventListener("click", executeClearTransactionsOnly);
+      document.getElementById("btnExecClearAll").addEventListener("click", executeClearAllData);
+
+      document.getElementById("btnSaveGasUrl").addEventListener("click", () => {
+        const url = document.getElementById("gasWebAppUrlInput").value.trim();
+        try {
+          localStorage.setItem(GAS_URL_KEY, url);
+        } catch (e) {}
+        syncWithGoogleSheets();
+      });
+
+      document.getElementById("btnCloudBackupDrive").addEventListener("click", async () => {
+        let gasUrl = "";
+        try {
+          gasUrl = document.getElementById("gasWebAppUrlInput").value.trim() || localStorage.getItem(GAS_URL_KEY) || "";
+        } catch (e) {}
+        if (!gasUrl) {
+          showToast("يرجى وضع رابط Google Apps Script أولاً، أو استخدم زر تحميل النسخة الاحتياطية على الموبايل.", "warning");
+          return;
+        }
+        try {
+          const r = await fetch(gasUrl, {
+            method: "POST",
+            headers: { "Content-Type": "text/plain;charset=utf-8" },
+            body: JSON.stringify({ action: "createBackup", user: currentSession.username, role: currentSession.role })
+          });
+          const j = await r.json();
+          if (j && j.status === "ok") {
+            showToast("تم حفظ نسخة احتياطية كاملة على Google Drive بنجاح!");
+          }
+        } catch (e) {
+          showToast("تعذر الاتصال بـ Google Drive حالياً — تم حفظ نسخة محلية بديلة.", "warning");
+          downloadLocalBackupFile("بديل_درايف");
+        }
+      });
+
+      document.getElementById("btnPullFromCloud").addEventListener("click", async () => {
+        let gasUrl = "";
+        try {
+          gasUrl = document.getElementById("gasWebAppUrlInput").value.trim() || localStorage.getItem(GAS_URL_KEY) || "";
+        } catch (e) {}
+        if (!gasUrl) {
+          showToast("يرجى إدخال رابط Web App أولاً", "warning");
+          return;
+        }
+        try {
+          const r = await fetch(gasUrl + "?action=pullAll");
+          const j = await r.json();
+          if (j && j.status === "ok" && j.data) {
+            db = { ...db, ...j.data, _pendingSyncCount: 0 };
+            ensureAdminAccountInMemory();
+            saveDatabaseToStorage(false);
+            renderAllViews();
+            showToast("تم سحب أحدث البيانات من Google Sheets بنجاح!");
+          }
+        } catch (e) {
+          showToast("تعذر السحب من السحابة — تأكد من الاتصال بالإنترنت وصحة الرابط.", "error");
+        }
+      });
+
+      document.getElementById("btnCopyGasCode").addEventListener("click", () => {
+        const codeText = getEmbeddedGasCode();
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(codeText).then(() => {
+            showToast("تم نسخ كود Google Apps Script (Code.gs) بالكامل للحافظة!");
+          }).catch(() => fallbackCopyText(codeText));
+        } else {
+          fallbackCopyText(codeText);
+        }
+      });
+
+      document.getElementById("btnDownloadSelfHtml").addEventListener("click", () => {
+        const htmlSource = "<!DOCTYPE html>\n" + document.documentElement.outerHTML;
+        const blob = new Blob([htmlSource], { type: "text/html;charset=utf-8" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "index.html";
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+        showToast("تم تحميل ملف index.html جاهزاً لرفعه على GitHub Pages!");
+      });
+    });
+
+    function fallbackCopyText(text) {
+      const ta = document.createElement("textarea");
+      ta.value = text;
+      document.body.appendChild(ta);
+      ta.select();
+      try {
+        document.execCommand("copy");
+        showToast("تم نسخ كود Google Apps Script بالكامل للحافظة!");
+      } catch (e) {
+        showToast("تعذر النسخ التلقائي", "error");
+      }
+      ta.remove();
+    }
+  </script>
+</body>
+</html>
